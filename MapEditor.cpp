@@ -8,8 +8,8 @@ MapEditor::MapEditor(sf::RenderWindow& windows) : Map(windows)
     map.resize(WINDOW_H / BLOCK_SIZE, std::vector<int>(WINDOW_W / BLOCK_SIZE, 0));
     isLeftMouseButtonPressed = false;
     isRightMouseButtonPressed = false;
-    colors[0] = sf::Color::Green;
-    colors[1] = sf::Color::Blue;
+    colors[0] = sf::Color::Yellow;
+    colors[1] = sf::Color::Green;
     colors[2] = sf::Color::Red;
     colors[3] = sf::Color::Yellow;
 
@@ -20,11 +20,18 @@ MapEditor::MapEditor(sf::RenderWindow& windows) : Map(windows)
 
 void MapEditor::run() {
     loadMapFromFile();
-    buttons.push_back(Button(sf::Vector2f(BUTTON_SIZE, BUTTON_SIZE/2),
-        sf::Vector2f(window.getSize().x-BUTTON_SIZE-2, 0),
+    for (int i = 0; i < 4; i++) {
+        buttons.push_back(Button(sf::Vector2f(BUTTON_SIZE, BUTTON_SIZE / 2),
+            sf::Vector2f(BUTTON_SIZE*i, 0),
+            sf::Color::Color(130, 78, 100, 255),
+            sf::Color::Color(255, 255, 255, 255),
+            10, namesButton[i]));
+    }
+    buttons.push_back(Button(sf::Vector2f(BUTTON_SIZE*3, BUTTON_SIZE / 2),
+        sf::Vector2f(BUTTON_SIZE, BUTTON_SIZE / 2),
         sf::Color::Color(130, 78, 100, 255),
         sf::Color::Color(255, 255, 255, 255),
-        10,"SAVE"));
+        10, namesTypePaint[0]));
     //srand(time(NULL));
     while (window.isOpen()) {
         handleEvents();
@@ -58,31 +65,6 @@ void MapEditor::saveMapToFile() {
         // Обработка ошибки открытия файла
     }
 }
-//void MapEditor::loadMapFromFile() {
-//    std::ifstream inFile("map.txt");
-//
-//    if (inFile.is_open()) {
-//        map.clear();
-//
-//        std::string line;
-//        while (std::getline(inFile, line)) {
-//            std::vector<int> row;
-//            std::istringstream iss(line);
-//            int value;
-//
-//            while (iss >> value) {
-//                row.push_back(value);
-//            }
-//
-//            map.push_back(row);
-//        }
-//
-//        inFile.close();
-//    }
-//    else {
-//        // Обработка ошибки открытия файла
-//    }
-//}
 void MapEditor::handleEvents() {
     sf::Event event;
     while (window.pollEvent(event)) {
@@ -91,13 +73,41 @@ void MapEditor::handleEvents() {
         }
 
         else if (event.type == sf::Event::MouseButtonPressed) {
-            sf::Vector2f localPosition(event.mouseButton.x, event.mouseButton.y);
-            if (buttons[0].getRectangle().getGlobalBounds().contains(localPosition)) {
-                needClose = 1;
-                return;
-            }
+            
             if (event.mouseButton.button == sf::Mouse::Left) {
-                isLeftMouseButtonPressed = true;
+                sf::Vector2f localPosition(event.mouseButton.x, event.mouseButton.y);
+                for (auto& x : buttons) {
+
+                    if (x.getRectangle().getGlobalBounds().contains(localPosition)) {
+                        std::string str = x.getString();
+                        if (str == "SAVE") {
+                            needClose = 1;
+                            tapButton = 1;
+                        }
+                        else if (str == "PREV") {
+                            paintType--;
+                            if (paintType < 0) paintType = 1; 
+                            tapButton = 1;
+                        }
+                        else if (str == "NEXT") {
+                            paintType++;
+                            if (paintType > 1) paintType = 0;
+                            tapButton = 1;
+                        }
+                        else if (str == "CLEAR") {
+                            map.clear();
+                            map.resize(WINDOW_H / BLOCK_SIZE, std::vector<int>(WINDOW_W / BLOCK_SIZE, 0));
+                            tapButton = 1;
+                        }
+
+                    }
+                }
+                if (!tapButton) {
+                    isLeftMouseButtonPressed = true;
+                }
+
+
+                
             }
             else if (event.mouseButton.button == sf::Mouse::Right) {
                 isRightMouseButtonPressed = true;
@@ -106,11 +116,13 @@ void MapEditor::handleEvents() {
         else if (event.type == sf::Event::MouseButtonReleased) {
             if (event.mouseButton.button == sf::Mouse::Left) {
                 isLeftMouseButtonPressed = false;
+                tapButton = 0;
             }
             else if (event.mouseButton.button == sf::Mouse::Right) {
                 isRightMouseButtonPressed = false;
             }
         }
+
     }
 
     if (isLeftMouseButtonPressed || isRightMouseButtonPressed) {
@@ -120,10 +132,7 @@ void MapEditor::handleEvents() {
 
         // Установите значение 1 или 0 в выбранной клетке
         if (x >= 0 && x < map[0].size() && y >= 0 && y < map.size()) {
-
-            int color = randoms(1, 4);
-            std::cout << color;
-            map[y][x] = (isLeftMouseButtonPressed) ? /*color*/1 : 0;
+            map[y][x] = (isLeftMouseButtonPressed) ?paintType+1 : 0;
         }
     }
 }
@@ -133,7 +142,9 @@ void MapEditor::update() {
 
     for (int y = map.size() - 1; y > 0; --y) {
         for (int x = 0; x < map[y].size(); ++x) {
-            if (map[y][x] > 0 && y < map.size() - 1 && map[y + 1][x] == 0) {
+            if (map[y][x] == 2) {
+            }
+            else if (map[y][x] > 0 && y < map.size() - 1 && map[y + 1][x] == 0) {
                 map[y + 1][x] = map[y][x];
                 map[y][x] = 0;
                 hasBlocksReachedBottom = true;
@@ -144,7 +155,9 @@ void MapEditor::update() {
     if (hasBlocksReachedBottom) {
         for (int y = map.size() - 1; y > 0; --y) {
             for (int x = 0; x < map[y].size(); ++x) {
-                if (map[y][x] > 0 && y < map.size() - 1) {
+                if (map[y][x] == 2) {
+                }
+                else if (map[y][x] > 0 && y < map.size() - 1) {
                     if (x > 0 && map[y + 1][x] > 0 && map[y + 1][x - 1] == 0) {
                         map[y + 1][x - 1] = map[y][x];
                         map[y][x] = 0;
@@ -163,11 +176,14 @@ void MapEditor::update() {
     }
 }
 
+
 void MapEditor::render() {
     window.clear();
+    buttons[4].setText(namesTypePaint[paintType]);
     for (auto & but : buttons) {
         but.render(window);
     }
+    
     // Отрисовка заполненных клеток
     for (int y = 0; y < map.size(); ++y) {
         for (int x = 0; x < map[y].size(); ++x) {

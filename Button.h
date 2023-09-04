@@ -17,6 +17,7 @@ public:
 	void render(sf::RenderWindow& window);
 	void changeBackColor(sf::Color colorBack);
 	void setFontColor(sf::Color color);
+	void setText(std::string& text);
 	sf::RectangleShape& getRectangle();
 	sf::Color getFontColor();
 	sf::Color getBackColor();

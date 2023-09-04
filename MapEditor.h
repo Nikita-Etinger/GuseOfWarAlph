@@ -17,6 +17,11 @@ public:
     
     void run() override;
 private:
+    bool tapButton=0;
+    int paintType=0;
+    rs textType;
+    std::string namesButton[4]{ "SAVE","PREV","NEXT","CLEAR"};
+    std::string namesTypePaint[2]{ "SAND","GRASS"};
     bool isLeftMouseButtonPressed = false;
     bool isRightMouseButtonPressed = false;
     void handleEvents();

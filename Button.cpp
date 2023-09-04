@@ -42,6 +42,9 @@ void Button::setFontColor(sf::Color color)
 	this->colorFont = color;
 	text.setFillColor(color);
 }
+void Button::setText(std::string& texts) {
+	text.setString(texts);
+}
 
 sf::RectangleShape& Button::getRectangle()
 {
