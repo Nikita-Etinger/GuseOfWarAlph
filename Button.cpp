@@ -1,5 +1,4 @@
 #include "Button.h"
-#include "config.h"
 
 
 
@@ -15,7 +14,8 @@ Button::Button(sf::Vector2f size, sf::Vector2f position, sf::Color colorBack, sf
 	text.setFillColor(colorFont);
 	text.setCharacterSize(fontSize);
 	text.setString(newText);
-	text.setPosition(position.x + (size.x - text.getLocalBounds().width) / 2.0f, position.y + (size.y - text.getLocalBounds().height) / 2.0f);
+
+
 
 
 
@@ -25,8 +25,8 @@ void Button::render(sf::RenderWindow& window)
 {
 	window.draw(rectangle);
 	text.setFont(font);
-	font.loadFromFile("arial.ttf");
-	text.setPosition(rectangle.getPosition().x + (size.x + text.getLocalBounds().width) / 2.0f, rectangle.getPosition().y + (size.y + text.getLocalBounds().height) / 2.0f);
+	font.loadFromFile("font.ttf");
+	text.setPosition(rectangle.getPosition().x + rectangle.getSize().x / 2 - text.getGlobalBounds().getSize().x/2, rectangle.getPosition().y+rectangle.getSize().y/2 - text.getGlobalBounds().getSize().y/1.5);
 	window.draw(text);
 
 
@@ -56,4 +56,9 @@ sf::Color Button::getFontColor()
 sf::Color Button::getBackColor()
 {
 	return rectangle.getFillColor();
+}
+
+std::string Button::getString()
+{
+	return text.getString();
 }

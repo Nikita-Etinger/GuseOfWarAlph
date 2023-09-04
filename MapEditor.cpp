@@ -1,16 +1,19 @@
 #include "MapEditor.h"
-#include <cstdlib>
-#include <ctime>
-#include <iostream>
-#include <string>
+
 #define randoms(a, b) (rand() % ((b) - (a) + 1) + (a))
 
 
-MapEditor::MapEditor(sf::RenderWindow& windows):window(windows)
+MapEditor::MapEditor(sf::RenderWindow& windows) : Map(windows)
 {
     map.resize(WINDOW_H / BLOCK_SIZE, std::vector<int>(WINDOW_W / BLOCK_SIZE, 0));
     isLeftMouseButtonPressed = false;
     isRightMouseButtonPressed = false;
+    colors[0] = sf::Color::Green;
+    colors[1] = sf::Color::Blue;
+    colors[2] = sf::Color::Red;
+    colors[3] = sf::Color::Yellow;
+
+
     
    
 }
@@ -37,12 +40,6 @@ void MapEditor::run() {
 }
 void MapEditor::colorMenu() {
 
-
-
-
-
-
-
 }
 void MapEditor::saveMapToFile() {
     std::ofstream outFile("map.txt");
@@ -61,32 +58,31 @@ void MapEditor::saveMapToFile() {
         // Обработка ошибки открытия файла
     }
 }
-void MapEditor::loadMapFromFile() {
-    std::ifstream inFile("map.txt");
-
-    if (inFile.is_open()) {
-        // Очистите текущую карту перед загрузкой
-        map.clear();
-
-        std::string line;
-        while (std::getline(inFile, line)) {
-            std::vector<int> row;
-            std::istringstream iss(line);
-            int value;
-
-            while (iss >> value) {
-                row.push_back(value);
-            }
-
-            map.push_back(row);
-        }
-
-        inFile.close();
-    }
-    else {
-        // Обработка ошибки открытия файла
-    }
-}
+//void MapEditor::loadMapFromFile() {
+//    std::ifstream inFile("map.txt");
+//
+//    if (inFile.is_open()) {
+//        map.clear();
+//
+//        std::string line;
+//        while (std::getline(inFile, line)) {
+//            std::vector<int> row;
+//            std::istringstream iss(line);
+//            int value;
+//
+//            while (iss >> value) {
+//                row.push_back(value);
+//            }
+//
+//            map.push_back(row);
+//        }
+//
+//        inFile.close();
+//    }
+//    else {
+//        // Обработка ошибки открытия файла
+//    }
+//}
 void MapEditor::handleEvents() {
     sf::Event event;
     while (window.pollEvent(event)) {
@@ -118,7 +114,7 @@ void MapEditor::handleEvents() {
     }
 
     if (isLeftMouseButtonPressed || isRightMouseButtonPressed) {
-        // Получите координаты мыши и преобразуйте их в индексы матрицы карты
+        //координаты мыши и преобразование их в индексы матрицы карты
         int x = sf::Mouse::getPosition(window).x / BLOCK_SIZE;
         int y = sf::Mouse::getPosition(window).y / BLOCK_SIZE;
 
@@ -179,7 +175,7 @@ void MapEditor::render() {
             if (value >= 1 && value <= 4) {
                 sf::RectangleShape block(sf::Vector2f(BLOCK_SIZE, BLOCK_SIZE));
                 block.setPosition(x * BLOCK_SIZE, y * BLOCK_SIZE);
-                block.setFillColor(colors[value - 1]); // Используйте соответствующий цвет из массива
+                block.setFillColor(colors[value - 1]); 
                 window.draw(block);
             }
         }

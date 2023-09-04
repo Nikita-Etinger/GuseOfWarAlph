@@ -1,7 +1,4 @@
-﻿
-
-#include <iostream>
-#include "MapEditor.h"
+﻿#include <iostream>
 #include "Game.h"
 
 
