@@ -20,5 +20,7 @@ public:
     
     void update();
     bool getStatus();
-    bool isValidPosition(int x, int y);
+    bool isValidPosition(float x, float y);
+    void createExplosion();
+    
 };
