@@ -1,6 +1,6 @@
 #include "Game.h"
 
-Game::Game() :window(sf::VideoMode(WINDOW_W, WINDOW_H), "SFML window"),mapEditor(window),backGround(vt(WINDOW_W, WINDOW_H))/*,landScape(window)*/
+Game::Game() :window(sf::VideoMode(WINDOW_W, WINDOW_H), "SFML window"),mapEditor(window),backGround(vt(WINDOW_W, WINDOW_H)),landScape(window)
 {
 }
 
@@ -17,7 +17,7 @@ void Game::actEvent()
 			if (x.getRectangle().getGlobalBounds().contains(localPosition)) {
 				std::string str = x.getString();
 				if (str == "PLAY") {
-
+					landScape.run();
 				}
 				else if (str == "MAP EDITOR") {
 					mapEditor.run();
@@ -26,6 +26,7 @@ void Game::actEvent()
 			}
 		}
 	}
+
 }
 
 void Game::run()

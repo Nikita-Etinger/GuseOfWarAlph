@@ -7,8 +7,6 @@
 #include "Button.h"
 #include <cstdlib>
 #include <iostream>
-
-#pragma once
 #include "Map.h"
 
 class MapEditor : public Map {
@@ -28,7 +26,6 @@ private:
     void update();
     void render();
     void saveMapToFile();
-    void colorMenu();
-    //void loadMapFromFile() override;
+    
     
 };

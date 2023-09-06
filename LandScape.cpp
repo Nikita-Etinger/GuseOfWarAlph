@@ -1,16 +1,18 @@
 #include "LandScape.h"
 
 
-
-
 LandScape::LandScape(sf::RenderWindow& windows) : Map(windows)
 {
     map.resize(WINDOW_H / BLOCK_SIZE, std::vector<int>(WINDOW_W / BLOCK_SIZE, 0));
+
 }
 
 void LandScape::run()
 {
+
     loadMapFromFile();
+    players.push_back(Player(getMap(),  window, 1, 3, "Jojo"));
+
     while (window.isOpen()) {
         handleEvents();
         update();
@@ -21,7 +23,9 @@ void LandScape::run()
 
 void LandScape::update()
 {
-
+    for (auto& p : projectile) {
+        p.update();
+    }
 
 }
 
@@ -54,5 +58,31 @@ void LandScape::handleEvents()
         if (event.type == sf::Event::Closed) {
             window.close();
         }
+
+        // ќбработка нажати€ левой кнопки мыши дл€ создани€ снар€да
+        if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
+            // ѕолучаем позицию мыши относительно окна
+            sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+
+            // ѕреобразуем позицию мыши в координаты карты
+            int mapX = mousePosition.x / BLOCK_SIZE;
+            int mapY = mousePosition.y / BLOCK_SIZE;
+
+            // —оздаем снар€д и добавл€ем его в вектор
+            if (!projectile.size()) {
+                Projectile newProjectile(getMap(), players, 10, 10, 0.5, mapX, mapY);
+                projectile.push_back(newProjectile);
+            }
+            else if (projectile[0].getStatus()) {
+                projectile.clear();
+            }
+        }
+        
+        for (auto& p : players) {
+            p.handlerEvent(event);
+        }
     }
+}
+std::vector<std::vector<int>>& LandScape::getMap() {
+    return map;
 }

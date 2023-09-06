@@ -4,6 +4,9 @@
 #include <vector>
 #include "MapEditor.h"
 #include "Button.h"
+#include "Player.h"
+#include "LandScape.h"
+#include "Projectile.h"
 
 class Game
 {
@@ -13,7 +16,7 @@ private:
 	std::string namesButton[3]{ "PLAY","MAP EDITOR","EXIT" };
 	MapEditor mapEditor;
 	rs backGround;
-	//LandScape landScape;
+	LandScape landScape;
 
 public:
 	Game();

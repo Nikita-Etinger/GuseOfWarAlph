@@ -133,6 +133,8 @@
     <ClCompile Include="LandScape.cpp" />
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="MapEditor.cpp" />
+    <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Projectile.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Button.h" />
@@ -141,8 +143,11 @@
     <ClInclude Include="LandScape.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="MapEditor.h" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="Projectile.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ClassDiagram.cd" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

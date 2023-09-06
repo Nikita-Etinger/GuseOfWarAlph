@@ -8,10 +8,7 @@ MapEditor::MapEditor(sf::RenderWindow& windows) : Map(windows)
     map.resize(WINDOW_H / BLOCK_SIZE, std::vector<int>(WINDOW_W / BLOCK_SIZE, 0));
     isLeftMouseButtonPressed = false;
     isRightMouseButtonPressed = false;
-    colors[0] = sf::Color::Yellow;
-    colors[1] = sf::Color::Green;
-    colors[2] = sf::Color::Red;
-    colors[3] = sf::Color::Yellow;
+
 
 
     
@@ -19,6 +16,7 @@ MapEditor::MapEditor(sf::RenderWindow& windows) : Map(windows)
 }
 
 void MapEditor::run() {
+    bool tapButton = 0;
     loadMapFromFile();
     for (int i = 0; i < 4; i++) {
         buttons.push_back(Button(sf::Vector2f(BUTTON_SIZE, BUTTON_SIZE / 2),
@@ -44,9 +42,6 @@ void MapEditor::run() {
         render();
     }
     saveMapToFile();
-}
-void MapEditor::colorMenu() {
-
 }
 void MapEditor::saveMapToFile() {
     std::ofstream outFile("map.txt");
