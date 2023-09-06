@@ -1,14 +1,16 @@
 #include "Player.h"
 #include "iostream"
 #include "Config.h"
+#include <cmath>
 
 
-
+const float gravity = 0.01f;
 
 Player::Player(std::vector<std::vector<int>>& mapS, sf::RenderWindow& windowS, bool com, int newPlayerId, std::string newName)
     : command(com), map(mapS), window(windowS), playerId(newPlayerId), playerName(newName) {
 
-
+    accelerationY = 0.0f;
+    accelerationX = 0.0f;
     placePlayersOnMap();
 }
 
@@ -19,77 +21,164 @@ void Player::update()
 
 
 void Player::placePlayersOnMap() {
-    int playerSize = 4;
+    int playerSize = 2;
     srand(time(NULL));
+    int playerY = 0;
+   
+    // Начинаем с верхней строки и идем вниз, пока не найдем пустую ячейку
     int playerX = rand() % (map.size() - playerSize);
-    int playerY = 0; // Начинаем с нулевой строки
+    for (; playerY < map.size()-playerSize-1; playerY++) {
+        if (map[playerX][playerY+playerSize] != 0)break;
 
-    // Ищем верхнюю границу песка
-    while (playerY < map[0].size() - playerSize && map[playerX][playerY] == 0) {
-        playerY++;
     }
+    playerY = 10;
+    //for (int x = 0; x < map.size() - 1; x++) {
+    //    for (int y = 0; y < map[x].size() - 1; y++) {
+    //        std::cout << map[x][y];
+    //    }
+    //    std::cout << std::endl;
+    //}
+
+
 
     // Помещаем игрока на карту
+    playerY -= playerSize;
     for (int i = 0; i < playerSize; i++) {
-        for (int j = 0; j < playerSize; j++) {
-            map[playerX + i][playerY + j] = playerId; // Размещаем игрока
+        for (int j = playerSize; j > 0; j--) {
+            map[playerY + i][playerX + j] = playerId; // Размещаем игрока
         }
     }
-
+    std::cout << "playerX: " << playerX << " playerY: " << playerY << std::endl;
     // Устанавливаем начальные координаты игрока
     posX = playerX;
     posY = playerY;
+
 }
 void Player::applyVelocity() {
-    // Применяем ускорение к позиции игрока
-    int newX = posX + velocityX;
-    int newY = posY +velocityY;
+    // Проверяем, касается ли игрок земли
+    bool onGround = isOnGround();
+    //std::cout << isOnGround();
+    // Сохраняем начальное положение игрока
+    int initialPosX = posX;
+    int initialPosY = posY;
 
-    if (isValidPosition(newX, newY)) {
-        // Если новая позиция допустима, перемещаем игрока
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                map[posX + i][posY + j] = 0; // Убираем игрока из текущей позиции
-                map[newX + i][newY + j] = playerId; // Размещаем игрока в новой позиции
-            }
-        }
-        posX = newX;
-        posY = newY;
-    }
-    // Обнуляем ускорение после перемещения
-    velocityX = 0.0f;
-    velocityY = 0.0f;
-}
-
-bool Player::isValidPosition(int x, int y) {
-    // Проверяем, что новая позиция находится в пределах карты и на песке или земле
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            if (x + i < 0 || x + i >= map.size() || y + j < 0 || y + j >= map[0].size()) {
-                return false;
-            }
-            if (map[x + i][y + j] != 1 && map[x + i][y + j] != 2) {
-                return false;
-            }
-        }
-    }
-    return true;
-}
-
-void Player::handlerEvent(sf::Event event) {
-    while (window.pollEvent(event)) { 
-        std::cout << "event Cath" << '\n';
-        if (event.type == sf::Event::KeyPressed) {
-            if (event.key.code == sf::Keyboard::A) {
-                velocityX -= 0.1f; 
-            }
-            else if (event.key.code == sf::Keyboard::D) {
-                velocityX += 0.1f; 
+    // Очистка старой позиции
+    for (int i = 2; i >= 0; i--) {
+        for (int j = 2; j >= 0; j--) {
+            if (posY + i >= 0 && posY + i < map.size() && posX + j >= 0 && posX + j < map[0].size()) {
+                map[posY + i][posX + j] = 0; // Помечаем старую позицию как пустую
             }
         }
     }
 
+    // Если игрок на земле, сбросить ускорение по Y
+    if (onGround) {
+        velocityY = 0.0f;
+        accelerationY = 0.0f;
+    }
+    else {
+        // Иначе, увеличить ускорение по Y (например, на гравитацию)
+        accelerationY += gravity; // gravity - константа гравитации
+        velocityY += accelerationY;
+    }
+
+    // Переместить игрока на новую позицию, учитывая его скорость (velocityX и velocityY)
+    if (posX + velocityX >= 0 && posX + velocityX + 2 < map[0].size()) {
+        posX += velocityX;
+    }
+
+    if (posY + velocityY >= 0 && posY + velocityY + 2 < map.size()) {
+        posY += velocityY;
+    }
+
+    bool flagValid = 1;
+
+    // Первая попытка разместить игрока
+    for (int i = 2; i >= 0; i--) {
+        for (int j = 2; j >= 0; j--) {
+            if (posY + i >= 0 && posY + i < map.size() && posX + j >= 0 && posX + j < map[0].size()) {
+                if (map[posY + i][posX + j] > 0) {
+                    posY--;
+                    flagValid = 0;
+                }
+            }
+        }
+    }
+
+    if (flagValid == 0) {
+        // Вторая попытка разместить игрока
+        flagValid = 1;
+        for (int i = 2; i >= 0; i--) {
+            for (int j = 2; j >= 0; j--) {
+                if (posY + i >= 0 && posY + i < map.size() && posX + j >= 0 && posX + j < map[0].size()) {
+                    if (map[posY + i][posX + j] > 0) {
+                        flagValid = 0;
+                    }
+                }
+            }
+        }
+    }
+
+    if (flagValid) {
+        // Успешно размещаем игрока
+        for (int i = 2; i >= 0; i--) {
+            for (int j = 2; j >= 0; j--) {
+                if (posY + i >= 0 && posY + i < map.size() && posX + j >= 0 && posX + j < map[0].size()) {
+                    map[posY + i][posX + j] = playerId;
+                }
+            }
+        }
+    }
+    else {
+        // Если не удалось разместить игрока после второй попытки, вернуть его на начальное положение
+        posX = initialPosX;
+        posY = initialPosY;
+        for (int i = 2; i >= 0; i--) {
+            for (int j = 2; j >= 0; j--) {
+                if (posY + i >= 0 && posY + i < map.size() && posX + j >= 0 && posX + j < map[0].size()) {
+                    map[posY + i][posX + j] = playerId;
+                }
+            }
+        }
+    }
+
+    velocityX = 0;
+    velocityY = 0;
 }
+
+bool Player::isOnGround() {
+    // Проверяем, есть ли земля над верхними блоками игрока (x, y и x+1, y)
+    for (int j = 0; j < 2; j++) {
+        int centerX = posX + j;  // Блок по X
+        int topY = posY + 3;  // Блок выше игрока
+
+        if (topY >= 0 && centerX >= 0 && centerX < map[0].size()) {
+            // Проверяем, есть ли земля над текущим блоком
+            if (map[topY][centerX] == 1 || map[topY][centerX] == 2) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+
+void Player::handlerEvent(sf::Event& event) {
+    if (event.key.code == sf::Keyboard::A) {
+        velocityX -=0.1f;
+        std::cout << "A" << '\n';
+        direction = 0;
+    }
+    else if (event.key.code == sf::Keyboard::D) {
+        velocityX += 0.1f;
+        std::cout << "D" << '\n';
+        direction = 1;
+    }
+
+}
+
+
 int Player::getId() {
     return playerId;
 }

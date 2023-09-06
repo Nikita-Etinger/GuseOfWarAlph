@@ -19,11 +19,15 @@ private:
 	std::string playerName;
 	float posX;
 	float posY;
+	float accelerationY;
+	float accelerationX;
+	bool isOnGround();
+	bool direction = 0;
 public:
 	Player(std::vector<std::vector<int>>& mapS, sf::RenderWindow& windowS, bool com, int newPlayerId, std::string newName);
 
 	void update();
-	void handlerEvent(sf::Event event);
+	void handlerEvent(sf::Event& event);
 	void applyVelocity();
 	void placePlayersOnMap();
 	bool isValidPosition(int x, int y);

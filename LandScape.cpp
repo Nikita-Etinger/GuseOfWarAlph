@@ -11,7 +11,7 @@ void LandScape::run()
 {
 
     loadMapFromFile();
-    players.push_back(Player(getMap(),  window, 1, 3, "Jojo"));
+    players.push_back(Player(map,  window, 1, 3, "Jojo"));
 
     while (window.isOpen()) {
         handleEvents();
@@ -26,6 +26,9 @@ void LandScape::update()
     for (auto& p : projectile) {
         p.update();
     }
+    for (auto& p : players) {
+        p.update();
+    }
 
 }
 
@@ -36,13 +39,13 @@ void LandScape::render()
         but.render(window);
     }
     // Отрисовка заполненных клеток
-    for (int y = 0; y < map.size(); ++y) {
-        for (int x = 0; x < map[y].size(); ++x) {
-            int value = map[y][x];
+    for (int x = 0; x < map.size(); ++x) {
+        for (int y = 0; y < map[x].size(); ++y) {
+            int value = map[x][y];
             if (value >= 1 && value <= 4) {
                 sf::RectangleShape block(sf::Vector2f(BLOCK_SIZE, BLOCK_SIZE));
-                block.setPosition(x * BLOCK_SIZE, y * BLOCK_SIZE);
-                block.setFillColor(colors[value - 1]); 
+                block.setPosition(y * BLOCK_SIZE, x * BLOCK_SIZE);
+                block.setFillColor(colors[value - 1]);
                 window.draw(block);
             }
         }
@@ -58,6 +61,11 @@ void LandScape::handleEvents()
         if (event.type == sf::Event::Closed) {
             window.close();
         }
+        if (event.type == sf::Event::KeyPressed) {
+            for (auto& p : players) {
+                p.handlerEvent(event);
+            }
+        }
 
         // Обработка нажатия левой кнопки мыши для создания снаряда
         if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
@@ -68,19 +76,18 @@ void LandScape::handleEvents()
             int mapX = mousePosition.x / BLOCK_SIZE;
             int mapY = mousePosition.y / BLOCK_SIZE;
 
+            std::cout << "X: " << mapX << " Y: " << mapY << std::endl;
             // Создаем снаряд и добавляем его в вектор
             if (!projectile.size()) {
-                Projectile newProjectile(getMap(), players, 10, 10, 0.5, mapX, mapY);
-                projectile.push_back(newProjectile);
+                /*Projectile newProjectile(getMap(), players, 10, 10, 0.5, mapY, mapX);
+                projectile.push_back(newProjectile);*/
             }
             else if (projectile[0].getStatus()) {
                 projectile.clear();
             }
         }
         
-        for (auto& p : players) {
-            p.handlerEvent(event);
-        }
+
     }
 }
 std::vector<std::vector<int>>& LandScape::getMap() {
