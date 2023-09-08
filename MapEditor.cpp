@@ -14,7 +14,7 @@ MapEditor::MapEditor(sf::RenderWindow& windows) : Map(windows)
 void MapEditor::run() {
     bool tapButton = false;
     loadMapFromFile();
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 5; i++) {
         buttons.push_back(Button(sf::Vector2f(BUTTON_SIZE, BUTTON_SIZE / 2),
             sf::Vector2f(BUTTON_SIZE * i, 0),
             sf::Color(130, 78, 100, 255),
@@ -22,7 +22,7 @@ void MapEditor::run() {
             10, namesButton[i]));
     }
     buttons.push_back(Button(sf::Vector2f(BUTTON_SIZE * 3, BUTTON_SIZE / 2),
-        sf::Vector2f(BUTTON_SIZE, BUTTON_SIZE / 2),
+        sf::Vector2f(BUTTON_SIZE, BUTTON_SIZE / 2+2),
         sf::Color(130, 78, 100, 255),
         sf::Color(255, 255, 255, 255),
         10, namesTypePaint[0]));
@@ -77,17 +77,25 @@ void MapEditor::handleEvents() {
                         }
                         else if (str == "PREV") {
                             paintType--;
-                            if (paintType < 0) paintType = 1;
+                            if (paintType < 0) paintType = 2;
                             tapButton = true;
                         }
                         else if (str == "NEXT") {
                             paintType++;
-                            if (paintType > 1) paintType = 0;
+                            if (paintType > 2) paintType = 0;
                             tapButton = true;
                         }
                         else if (str == "CLEAR") {
                             map.clear();
                             map.resize(WINDOW_H / BLOCK_SIZE, std::vector<int>(WINDOW_W / BLOCK_SIZE, 0));
+                            tapButton = true;
+                        }
+                        else if (str == "FILL") {
+                            for (int i = 0; i < map.size();i++) {
+                                for (int j = 0; j < map[0].size(); j++) {
+                                    if(map[i][j] == 0)map[i][j] = paintType+1;
+                                }
+                            }
                             tapButton = true;
                         }
                     }
@@ -115,61 +123,64 @@ void MapEditor::handleEvents() {
         //  оординаты мыши и преобразование их в индексы матрицы карты
         int y = sf::Mouse::getPosition(window).x / BLOCK_SIZE;
         int x = sf::Mouse::getPosition(window).y / BLOCK_SIZE;
+        if (paintType == 2) {
+            if (y >= 0 && y < map[0].size() && x >= 0 && x < map.size()) {
+                explosion(vt(x, y), 10);
+            }
+        }
         
         // ”становите значение 1 или 0 в выбранной клетке
-        if (y >= 0 && y < map[0].size() && x >= 0 && x < map.size()) {
+        else if (y >= 0 && y < map[0].size() && x >= 0 && x < map.size()) {
             map[x][y] = (isLeftMouseButtonPressed) ? paintType + 1 : 0;
         }
     }
 }
 
 void MapEditor::update() {
-    bool hasBlocksReachedBottom = false;
+        bool hasBlocksReachedBottom = false;
 
-    for (int x = map.size() - 1; x > 0; --x) {
-        for (int y = 0; y < map[x].size(); ++y) {
-            if (map[x][y] == 2) {
-                // ¬озможно, здесь должна быть кака€-то логика дл€ случа€ map[x][y] == 2
-            }
-            else if (map[x][y] > 0 && x < map.size() - 1 && map[x + 1][y] == 0) {
-                map[x + 1][y] = map[x][y];
-                map[x][y] = 0;
-                hasBlocksReachedBottom = true;
-            }
-        }
-    }
-
-    if (hasBlocksReachedBottom) {
         for (int x = map.size() - 1; x > 0; --x) {
             for (int y = 0; y < map[x].size(); ++y) {
                 if (map[x][y] == 2) {
-                    // ¬озможно, здесь должна быть кака€-то логика дл€ случа€ map[x][y] == 2
+
                 }
-                else if (map[x][y] > 0 && x < map.size() - 1) {
-                    if (y > 0 && map[x + 1][y] > 0 && map[x + 1][y - 1] == 0) {
-                        map[x + 1][y - 1] = map[x][y];
-                        map[x][y] = 0;
+                else if (map[x][y] > 0 && x < map.size() - 1 && map[x + 1][y] == 0) {
+                    map[x + 1][y] = map[x][y];
+                    map[x][y] = 0;
+                    hasBlocksReachedBottom = true;
+                }
+            }
+        }
+
+        if (hasBlocksReachedBottom) {
+            for (int x = map.size() - 1; x > 0; --x) {
+                for (int y = 0; y < map[x].size(); ++y) {
+                    if (map[x][y] == 2) {
+
                     }
-                    else if (y < map[x].size() - 1 && map[x + 1][y] > 0 && map[x + 1][y + 1] == 0) {
-                        map[x + 1][y + 1] = map[x][y];
-                        map[x][y] = 0;
-                    }
-                    else if (map[x + 1][y] == 0) {
-                        map[x + 1][y] = map[x][y];
-                        map[x][y] = 0;
+                    else if (map[x][y] > 0 && x < map.size() - 1) {
+                        if (y > 0 && map[x + 1][y] > 0 && map[x + 1][y - 1] == 0) {
+                            map[x + 1][y - 1] = map[x][y];
+                            map[x][y] = 0;
+                        }
+                        else if (y < map[x].size() - 1 && map[x + 1][y] > 0 && map[x + 1][y + 1] == 0) {
+                            map[x + 1][y + 1] = map[x][y];
+                            map[x][y] = 0;
+                        }
+                        else if (map[x + 1][y] == 0) {
+                            map[x + 1][y] = map[x][y];
+                            map[x][y] = 0;
+                        }
                     }
                 }
             }
         }
-    }
+
 }
 
 void MapEditor::render() {
     window.clear();
-    buttons[4].setText(namesTypePaint[paintType]);
-    for (auto& but : buttons) {
-        but.render(window);
-    }
+
 
     // ќтрисовка заполненных клеток
     for (int x = 0; x < map.size(); ++x) {
@@ -182,6 +193,10 @@ void MapEditor::render() {
                 window.draw(block);
             }
         }
+    }
+    buttons[5].setText(namesTypePaint[paintType]);
+    for (auto& but : buttons) {
+        but.render(window);
     }
 
     window.display();

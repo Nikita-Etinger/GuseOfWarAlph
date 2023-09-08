@@ -166,12 +166,12 @@ bool Player::isOnGround() {
 
 void Player::handlerEvent(sf::Event& event) {
     if (event.key.code == sf::Keyboard::A) {
-        velocityX -=0.1f;
+        velocityX -=0.5f;
         std::cout << "A" << '\n';
         direction = 0;
     }
     else if (event.key.code == sf::Keyboard::D) {
-        velocityX += 0.1f;
+        velocityX += 0.5f;
         std::cout << "D" << '\n';
         direction = 1;
     }

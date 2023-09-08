@@ -3,13 +3,13 @@
 #include "Button.h"
 #include <fstream>
 #include "sstream"
-
+#include "Config.h"
 class Map {
 public:
     Map(sf::RenderWindow& windowS);
 
     virtual void run()=0;
-
+    virtual void explosion(vt coordinate, float radius);
 protected:
     sf::RenderWindow& window;
     std::vector<std::vector<int>> map;
@@ -31,4 +31,5 @@ protected:
     //virtual void render() = 0;
     //virtual void saveMapToFile() = 0;
     virtual void loadMapFromFile(); // Общая реализация для загрузки карты
+    
 };

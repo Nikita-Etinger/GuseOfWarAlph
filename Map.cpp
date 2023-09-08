@@ -31,3 +31,18 @@ void Map::loadMapFromFile()
         // Обработка ошибки открытия файла
     }
 }
+void Map::explosion(vt coordinate, float radius) {
+    for (int x = 0; x < map.size(); ++x) {
+        for (int y = 0; y < map[0].size(); ++y) {
+            // Рассчитываем расстояние от текущей точки до эпицентра взрыва
+            float distance = std::sqrt((x - coordinate.x) * (x - coordinate.x) + (y - coordinate.y) * (y - coordinate.y));
+
+            // Проверяем, находится ли точка внутри радиуса взрыва
+            if (distance <= radius) {
+                // Выполняем действия, связанные с взрывом, в данной точке
+                // Например, устанавливаем значение в матрице map[x][y] равным 0
+                map[x][y] = 0;
+            }
+        }
+    }
+}
