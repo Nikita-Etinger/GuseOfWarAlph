@@ -17,6 +17,8 @@ private:
     void handleEvents();
     void update();
     void render();
+    int mousePosX;
+    int mousePosY;
     
 
 };

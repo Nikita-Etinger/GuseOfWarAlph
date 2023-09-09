@@ -38,6 +38,7 @@ void MapEditor::run() {
         render();
     }
     saveMapToFile();
+
 }
 
 void MapEditor::saveMapToFile() {
@@ -90,7 +91,7 @@ void MapEditor::handleEvents() {
                             map.resize(WINDOW_H / BLOCK_SIZE, std::vector<int>(WINDOW_W / BLOCK_SIZE, 0));
                             tapButton = true;
                         }
-                        else if (str == "FILL") {
+                        else if (str == "FILL"&&paintType!=2) {
                             for (int i = 0; i < map.size();i++) {
                                 for (int j = 0; j < map[0].size(); j++) {
                                     if(map[i][j] == 0)map[i][j] = paintType+1;
@@ -137,45 +138,52 @@ void MapEditor::handleEvents() {
 }
 
 void MapEditor::update() {
-        bool hasBlocksReachedBottom = false;
+    bool hasBlocksReachedBottom = false;
 
-        for (int x = map.size() - 1; x > 0; --x) {
-            for (int y = 0; y < map[x].size(); ++y) {
-                if (map[x][y] == 2) {
-
-                }
-                else if (map[x][y] > 0 && x < map.size() - 1 && map[x + 1][y] == 0) {
-                    map[x + 1][y] = map[x][y];
+    for (int x = map.size() - 1; x > 0; --x) {
+        for (int y = 0; y < map[x].size(); ++y) {
+            if (map[x][y] == 2) {
+                // Здесь вы можете добавить логику для движения песка вниз
+                // Например, если текущая клетка содержит песок (значение 2), то вы можете проверить клетку под ней
+                // и переместить песок вниз, если клетка под ней пуста (значение 0).
+                if (x < map.size() - 1 && map[x + 1][y] == 0) {
+                    map[x + 1][y] = 2;
                     map[x][y] = 0;
                     hasBlocksReachedBottom = true;
                 }
             }
+            else if (map[x][y] > 0 && x < map.size() - 1 && map[x + 1][y] == 0) {
+                map[x + 1][y] = map[x][y];
+                map[x][y] = 0;
+                hasBlocksReachedBottom = true;
+            }
         }
+    }
 
-        if (hasBlocksReachedBottom) {
-            for (int x = map.size() - 1; x > 0; --x) {
-                for (int y = 0; y < map[x].size(); ++y) {
-                    if (map[x][y] == 2) {
-
+    if (hasBlocksReachedBottom) {
+        for (int x = map.size() - 1; x > 0; --x) {
+            for (int y = 0; y < map[x].size(); ++y) {
+                if (map[x][y] == 2) {
+                    // Здесь также может потребоваться обработка движения песка влево или вправо,
+                    // если соседние клетки заняты.
+                }
+                else if (map[x][y] > 0 && x < map.size() - 1) {
+                    if (y > 0 && map[x + 1][y] > 0 && map[x + 1][y - 1] == 0) {
+                        map[x + 1][y - 1] = map[x][y];
+                        map[x][y] = 0;
                     }
-                    else if (map[x][y] > 0 && x < map.size() - 1) {
-                        if (y > 0 && map[x + 1][y] > 0 && map[x + 1][y - 1] == 0) {
-                            map[x + 1][y - 1] = map[x][y];
-                            map[x][y] = 0;
-                        }
-                        else if (y < map[x].size() - 1 && map[x + 1][y] > 0 && map[x + 1][y + 1] == 0) {
-                            map[x + 1][y + 1] = map[x][y];
-                            map[x][y] = 0;
-                        }
-                        else if (map[x + 1][y] == 0) {
-                            map[x + 1][y] = map[x][y];
-                            map[x][y] = 0;
-                        }
+                    else if (y < map[x].size() - 1 && map[x + 1][y] > 0 && map[x + 1][y + 1] == 0) {
+                        map[x + 1][y + 1] = map[x][y];
+                        map[x][y] = 0;
+                    }
+                    else if (map[x + 1][y] == 0) {
+                        map[x + 1][y] = map[x][y];
+                        map[x][y] = 0;
                     }
                 }
             }
         }
-
+    }
 }
 
 void MapEditor::render() {
@@ -186,7 +194,7 @@ void MapEditor::render() {
     for (int x = 0; x < map.size(); ++x) {
         for (int y = 0; y < map[x].size(); ++y) {
             int value = map[x][y];
-            if (value >= 1 && value <= 4) {
+            if (value >= 1 && value <= 9) {
                 sf::RectangleShape block(sf::Vector2f(BLOCK_SIZE, BLOCK_SIZE));
                 block.setPosition(y * BLOCK_SIZE, x * BLOCK_SIZE);
                 block.setFillColor(colors[value - 1]);

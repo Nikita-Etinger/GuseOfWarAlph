@@ -11,11 +11,19 @@ void LandScape::run()
 {
 
     loadMapFromFile();
-    players.push_back(Player(map,  window, 1, 3, "Jojo"));
+    //for (int i = 0; i < 3; i++) {
+    //    players.push_back(Player(map, window, 0, i+3, "Jojo"));
+    //    std::cout << "Player add:" << i+3 << std::endl;
+    //}
+    //for (int i = 0; i < 3; i++) {
+    //    players.push_back(Player(map, window, 1, i+6, "Jojo"));
+    //    std::cout << "Player add:" << i + 6 << std::endl;
+    //}
+    players.push_back(Player(map, window, 1, 3, "Jojo"));
 
     while (window.isOpen()) {
         handleEvents();
-        update();
+        //update();
         render();
     }
 }
@@ -35,6 +43,7 @@ void LandScape::update()
 void LandScape::render()
 {
     window.clear();
+    
     for (auto& but : buttons) {
         but.render(window);
     }
@@ -42,20 +51,29 @@ void LandScape::render()
     for (int x = 0; x < map.size(); ++x) {
         for (int y = 0; y < map[x].size(); ++y) {
             int value = map[x][y];
-            if (value >= 1 && value <= 4) {
+            if (value >= 1 && value <= 8) {
                 sf::RectangleShape block(sf::Vector2f(BLOCK_SIZE, BLOCK_SIZE));
                 block.setPosition(y * BLOCK_SIZE, x * BLOCK_SIZE);
                 block.setFillColor(colors[value - 1]);
+                block.setOutlineThickness(1);
                 window.draw(block);
             }
+            //else {
+            //    sf::RectangleShape block(sf::Vector2f(BLOCK_SIZE, BLOCK_SIZE));
+            //    block.setPosition(y * BLOCK_SIZE, x * BLOCK_SIZE);
+            //    block.setFillColor(sf::Color::Black);
+            //    block.setOutlineThickness(1);
+            //    window.draw(block);
+            //}
         }
     }
-
+    update();
     window.display();
 }
 
 void LandScape::handleEvents()
 {
+    std::cout << "X: " << mousePosX << " Y: " << mousePosY << std::endl;
     sf::Event event;
     while (window.pollEvent(event)) {
         if (event.type == sf::Event::Closed) {
@@ -66,17 +84,22 @@ void LandScape::handleEvents()
                 p.handlerEvent(event);
             }
         }
+        sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+        // Преобразуем позицию мыши в координаты карты
+        int mapX = mousePosition.x / BLOCK_SIZE;
+        int mapY = mousePosition.y / BLOCK_SIZE;
+        mousePosX=mapX;
+        mousePosY=mapY;
+        
 
-        // Обработка нажатия левой кнопки мыши для создания снаряда
+        // Обработка нажатия левой кнопки мыши для создания снаряда (ожидает реализации)
         if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
             // Получаем позицию мыши относительно окна
-            sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+            
 
-            // Преобразуем позицию мыши в координаты карты
-            int mapX = mousePosition.x / BLOCK_SIZE;
-            int mapY = mousePosition.y / BLOCK_SIZE;
 
-            std::cout << "X: " << mapX << " Y: " << mapY << std::endl;
+
+            /*std::cout << "X: " << mapX << " Y: " << mapY << std::endl;*/
             // Создаем снаряд и добавляем его в вектор
             if (!projectile.size()) {
                 /*Projectile newProjectile(getMap(), players, 10, 10, 0.5, mapY, mapX);
@@ -89,6 +112,7 @@ void LandScape::handleEvents()
         
 
     }
+    
 }
 std::vector<std::vector<int>>& LandScape::getMap() {
     return map;
