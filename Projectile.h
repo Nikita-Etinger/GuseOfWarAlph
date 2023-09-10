@@ -1,10 +1,14 @@
 #pragma once
+#include "Config.h"
 #include <vector>
-#include "Player.h"
+#include <SFML/Graphics.hpp>
+#include <iostream>
+
+
+
 class Projectile
 {
 private:
-    std::vector<Player>& players;
     bool explosion=0;
     float velocityX;
     float velocityY;
@@ -16,7 +20,7 @@ private:
     std::vector<std::vector<int>>& map;
 
 public:
-    Projectile(std::vector<std::vector<int>>& mapS, std::vector<Player>& playersS, float velocityX, float velocityY, float speed, float startPositionX, float startPositionY);
+    Projectile(std::vector<std::vector<int>>& mapS);
     
     void update();
     bool getStatus();
