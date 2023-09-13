@@ -1,28 +1,30 @@
 #include "Projectile.h"
 
-Projectile::Projectile(std::vector<std::vector<int>>& mapS)
-    : map(mapS) {
+Projectile::Projectile(float positionXS,float positionYS, float velocityXS, float velocityYS, float speedS)
+    :positionX(positionXS), positionY(positionYS), velocityX(velocityXS),velocityY(velocityYS), speed(speedS) {
 
     std::cout << "Create projectile" << std::endl;
-}
-
-void Projectile::update() {
-    if (!explosion) {
-    }
 }
 
 void Projectile::applyVelocity() {
 
 }
 
-void Projectile::createExplosion() {
+void Projectile::update(){
 
 }
-
 bool Projectile::getStatus() {
     return explosion;
 }
-
-bool Projectile::isValidPosition(float x, float y) {
-    return true;
+vt Projectile::getCoordinate() {
+    return vt(positionX, positionY);
+}
+float Projectile::getRadius() {
+    return radius;
+}
+int Projectile::getSize() {
+    return size;
+}
+void Projectile::explosions(){
+    explosion = 1;
 }

@@ -13,18 +13,21 @@ private:
     float velocityX;
     float velocityY;
     float speed;
-    float radius;
-    int size;
-    float PositionX, PositionY;
-    void applyVelocity();
-    std::vector<std::vector<int>>& map;
+    float radius=5;
+    int size=2;
+    float positionX = 0;
+    float positionY=0;
+    
+
 
 public:
-    Projectile(std::vector<std::vector<int>>& mapS);
-    
+    Projectile(float positionX, float positionY, float velocityXS, float velocityYS, float speed);
+    void applyVelocity();
     void update();
     bool getStatus();
-    bool isValidPosition(float x, float y);
-    void createExplosion();
+    vt getCoordinate();
+    float getRadius();
+    int getSize();
+    void explosions();
     
 };
