@@ -16,17 +16,17 @@ public:
 
 private:
     
-    sf::RenderTexture mapTexture;
-    sf::Sprite mapSprite;
     std::vector<Projectile> projectile;
     std::vector<Player> players;
     void handleEvents();
+
+
     void update();
     void render();
+
     int mousePosX;
     int mousePosY;
     bool flagUpdate = 1;
-    void updateMapTexture();
     
 
 };

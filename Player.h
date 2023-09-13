@@ -31,8 +31,8 @@ private:
 	std::string playerName;
 	float posX;
 	float posY;
-	float accelerationY;
-	float accelerationX;
+	float accelerationY=0;
+	float accelerationX=0;
 	bool isOnGround();
 	bool direction = 0;
 	int playerSize;
@@ -46,7 +46,10 @@ private:
 	void drawCenter();
 	void PlacePositionOnMap();
 	bool ScanPosition();
+	int coorectCollision = 0;//корректировка колизии персонажа 
+
 public:
+	bool scanContactProjectile(float radius, vt coordinatePr);
 	Player(std::vector<std::vector<int>>& mapS, sf::RenderWindow& windowS, bool com, int newPlayerId, std::string newName, std::vector<Projectile>& projectileS);
 	~Player();
 	void update();

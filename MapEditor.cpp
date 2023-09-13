@@ -1,19 +1,22 @@
-#include "MapEditor.h"
-#include <ctime>  // Для использования time
+п»ї#include "MapEditor.h"
+#include <ctime>  // Р”Р»СЏ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ time
 #include <fstream>
-
+#define cout std::cout<<
 #define randoms(a, b) (rand() % ((b) - (a) + 1) + (a))
 
 MapEditor::MapEditor(sf::RenderWindow& windows) : Map(windows)
 {
     map.resize(WINDOW_H / BLOCK_SIZE, std::vector<int>(WINDOW_W / BLOCK_SIZE, 0));
+    mapTexture.create(WINDOW_W, WINDOW_H);
     isLeftMouseButtonPressed = false;
     isRightMouseButtonPressed = false;
+    loadMapFromFile();
+    updateMapTexture();
 }
 
 void MapEditor::run() {
     bool tapButton = false;
-    loadMapFromFile();
+
     for (int i = 0; i < 5; i++) {
         buttons.push_back(Button(sf::Vector2f(BUTTON_SIZE, BUTTON_SIZE / 2),
             sf::Vector2f(BUTTON_SIZE * i, 0),
@@ -26,18 +29,19 @@ void MapEditor::run() {
         sf::Color(130, 78, 100, 255),
         sf::Color(255, 255, 255, 255),
         10, namesTypePaint[0]));
-
     while (window.isOpen()) {
-        handleEvents();
+        
         if (needClose) {
             saveMapToFile();
             needClose = false;
+            saveMapToFile();
             return;
         }
-        update();
+        
         render();
+        
     }
-    saveMapToFile();
+    
 
 }
 
@@ -49,13 +53,13 @@ void MapEditor::saveMapToFile() {
             for (int y = 0; y < map[x].size(); ++y) {
                 outFile << map[x][y] << " ";
             }
-            outFile << std::endl; // Переход на новую строку после каждой строки карты
+            outFile << std::endl; // РџРµСЂРµС…РѕРґ РЅР° РЅРѕРІСѓСЋ СЃС‚СЂРѕРєСѓ РїРѕСЃР»Рµ РєР°Р¶РґРѕР№ СЃС‚СЂРѕРєРё РєР°СЂС‚С‹
         }
 
         outFile.close();
     }
     else {
-        // Обработка ошибки открытия файла
+        // РћР±СЂР°Р±РѕС‚РєР° РѕС€РёР±РєРё РѕС‚РєСЂС‹С‚РёСЏ С„Р°Р№Р»Р°
         std::cerr << "Error: Unable to open the file." << std::endl;
     }
 }
@@ -68,6 +72,7 @@ void MapEditor::handleEvents() {
         }
         else if (event.type == sf::Event::MouseButtonPressed) {
             if (event.mouseButton.button == sf::Mouse::Left) {
+                
                 sf::Vector2f localPosition(event.mouseButton.x, event.mouseButton.y);
                 for (auto& x : buttons) {
                     if (x.getRectangle().getGlobalBounds().contains(localPosition)) {
@@ -84,7 +89,9 @@ void MapEditor::handleEvents() {
                         else if (str == "NEXT") {
                             paintType++;
                             if (paintType > 2) paintType = 0;
+                            cout "NEXT" << '\n';
                             tapButton = true;
+
                         }
                         else if (str == "CLEAR") {
                             map.clear();
@@ -97,6 +104,7 @@ void MapEditor::handleEvents() {
                                     if(map[i][j] == 0)map[i][j] = paintType+1;
                                 }
                             }
+                            needUpdateMap = 1;
                             tapButton = true;
                         }
                     }
@@ -106,6 +114,7 @@ void MapEditor::handleEvents() {
                 }
             }
             else if (event.mouseButton.button == sf::Mouse::Right) {
+                needUpdateMap = 1;
                 isRightMouseButtonPressed = true;
             }
         }
@@ -121,23 +130,27 @@ void MapEditor::handleEvents() {
     }
 
     if (isLeftMouseButtonPressed || isRightMouseButtonPressed) {
-        // Координаты мыши и преобразование их в индексы матрицы карты
+        
+        // РљРѕРѕСЂРґРёРЅР°С‚С‹ РјС‹С€Рё Рё РїСЂРµРѕР±СЂР°Р·РѕРІР°РЅРёРµ РёС… РІ РёРЅРґРµРєСЃС‹ РјР°С‚СЂРёС†С‹ РєР°СЂС‚С‹
         int y = sf::Mouse::getPosition(window).x / BLOCK_SIZE;
         int x = sf::Mouse::getPosition(window).y / BLOCK_SIZE;
         if (paintType == 2) {
             if (y >= 0 && y < map[0].size() && x >= 0 && x < map.size()) {
                 explosion(vt(x, y), 10);
             }
+            
         }
         
-        // Установите значение 1 или 0 в выбранной клетке
         else if (y >= 0 && y < map[0].size() && x >= 0 && x < map.size()) {
             map[x][y] = (isLeftMouseButtonPressed) ? paintType + 1 : 0;
+            
         }
+        needUpdateMap = 1;
     }
 }
 
-void MapEditor::update() {
+
+void MapEditor::renderWithoutTexture() {
     bool hasBlocksReachedBottom = false;
 
     for (int x = map.size() - 1; x > 0; --x) {
@@ -157,8 +170,8 @@ void MapEditor::update() {
         for (int x = map.size() - 1; x > 0; --x) {
             for (int y = 0; y < map[x].size(); ++y) {
                 if (map[x][y] == 2) {
-                    // Здесь также может потребоваться обработка движения песка влево или вправо,
-                    // если соседние клетки заняты.
+                    // Г‡Г¤ГҐГ±Гј ГІГ ГЄГ¦ГҐ Г¬Г®Г¦ГҐГІ ГЇГ®ГІГ°ГҐГЎГ®ГўГ ГІГјГ±Гї Г®ГЎГ°Г ГЎГ®ГІГЄГ  Г¤ГўГЁГ¦ГҐГ­ГЁГї ГЇГҐГ±ГЄГ  ГўГ«ГҐГўГ® ГЁГ«ГЁ ГўГЇГ°Г ГўГ®,
+                    // ГҐГ±Г«ГЁ Г±Г®Г±ГҐГ¤Г­ГЁГҐ ГЄГ«ГҐГІГЄГЁ Г§Г Г­ГїГІГ».
                 }
                 else if (map[x][y] > 0 && x < map.size() - 1) {
                     if (y > 0 && map[x + 1][y] > 0 && map[x + 1][y - 1] == 0) {
@@ -177,13 +190,8 @@ void MapEditor::update() {
             }
         }
     }
-}
-
-void MapEditor::render() {
-    window.clear();
 
 
-    // Отрисовка заполненных клеток
     for (int x = 0; x < map.size(); ++x) {
         for (int y = 0; y < map[x].size(); ++y) {
             int value = map[x][y];
@@ -200,5 +208,19 @@ void MapEditor::render() {
         but.render(window);
     }
 
+}
+void MapEditor::render() {
+    window.clear();
+
+    //drawMap();
+    renderWithoutTexture();
+    for (auto& b : buttons) {
+        b.render(window);
+    }
+    update();
     window.display();
+    //std::cout << "XXXXXXXXXXXXX" << '\n';
+}
+void MapEditor::update() {
+    handleEvents();
 }

@@ -8,7 +8,6 @@ Projectile::Projectile(std::vector<std::vector<int>>& mapS)
 
 void Projectile::update() {
     if (!explosion) {
-       /* applyVelocity();*/
     }
 }
 

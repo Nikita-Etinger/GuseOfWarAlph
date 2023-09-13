@@ -22,9 +22,12 @@ private:
     std::string namesTypePaint[3]{ "SAND","GRASS","EXPLOSION"};
     bool isLeftMouseButtonPressed = false;
     bool isRightMouseButtonPressed = false;
-    void handleEvents();
+
     void update();
     void render();
+
+    void handleEvents();
+    void renderWithoutTexture();
     void saveMapToFile();
     
     
