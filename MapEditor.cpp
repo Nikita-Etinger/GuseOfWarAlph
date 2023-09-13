@@ -141,8 +141,13 @@ void MapEditor::handleEvents() {
             
         }
         
-        else if (y >= 0 && y < map[0].size() && x >= 0 && x < map.size()) {
-            map[x][y] = (isLeftMouseButtonPressed) ? paintType + 1 : 0;
+        else if (y+1 >= 0 && y + 1 < map[0].size() && x + 1 >= 0 && x + 1 < map.size()&& y - 1 >= 0 && y - 1 < map[0].size() && x - 1 >= 0 && x - 1 < map.size()) {
+            for (int i = x - 1; i < x+1; i++) {
+                for (int j = y - 1; j < y+1; j++) {
+                    map[i][j] = (isLeftMouseButtonPressed) ? paintType + 1 : 0;
+                }
+            }
+            //map[x][y] = (isLeftMouseButtonPressed) ? paintType + 1 : 0;
             
         }
         needUpdateMap = 1;

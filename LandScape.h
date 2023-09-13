@@ -27,7 +27,7 @@ private:
     int mousePosX;
     int mousePosY;
     bool flagUpdate = 1;
-    
+    void scanCollicionProjectile();
 
 };
 

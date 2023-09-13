@@ -31,7 +31,7 @@ protected:
         sf::Color(0, 255, 255)   // Ярко-голубой цвет 
     };
     bool flagUpdate = false;
-
+    float time = 0;
 
     //реализация в map
     virtual void applyPhysics();

@@ -167,4 +167,5 @@ void Map::explosion(vt coordinate, float radius) {
             }
         }
     }
+    needUpdateMap = 1;
 }

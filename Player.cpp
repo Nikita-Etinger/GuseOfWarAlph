@@ -4,8 +4,8 @@
 #define cout std::cout<<
 
 const float gravity = 1.5f;
-Player::Player(std::vector<std::vector<int>>& mapS, sf::RenderWindow& windowS, bool com, int newPlayerId, std::string newName, std::vector<Projectile>& projectileS)
-    : command(com), map(mapS), window(windowS), playerId(newPlayerId), playerName(newName), projectile(projectileS) {
+Player::Player(std::vector<std::vector<int>>& mapS, sf::RenderWindow& windowS, bool com, int newPlayerId, std::string newName, std::vector<Projectile>& projectileS,float& time)
+    : command(com), map(mapS), window(windowS), playerId(newPlayerId), playerName(newName), projectile(projectileS),timeF(time) {
 
 
         playerSize = 5;
@@ -100,8 +100,8 @@ void Player::applyVelocity() {
     }
 
     // ѕереместить игрока на новую позицию, учитыва€ его скорость (velocityX и velocityY)
-    posX += velocityX + accelerationX;
-    posY += velocityY + accelerationY;
+    posX += velocityX + accelerationX * timeF;
+    posY += velocityY + accelerationY * timeF;
 
 
 
@@ -126,11 +126,11 @@ void Player::applyVelocity() {
         // –азместить игрока на начальной позиции
         //PlacePositionOnMap();
     }
-    if (accelerationX > 0)accelerationX -= accelerationY / 3;
-    else if (accelerationX < 0)accelerationX+= accelerationY / 3;
+    if (accelerationX > 0)accelerationX -= accelerationY / 3 * timeF;
+    else if (accelerationX < 0)accelerationX+= accelerationY / 3 * timeF;
     else accelerationX = 0;
-    if (accelerationY > 0)accelerationY-= accelerationY / 3;
-    else if (accelerationY < 0)accelerationY += accelerationY/3;
+    if (accelerationY > 0)accelerationY-= accelerationY / 3 * timeF;
+    else if (accelerationY < 0)accelerationY += accelerationY/3 * timeF;
     else accelerationY = 0;
     velocityX = 0;
     velocityY = 0;
@@ -286,7 +286,7 @@ void Player::handlerEvent(sf::Event& event) {
 
     if (stage == 0) {
         if (event.key.code == sf::Keyboard::A || event.key.code == sf::Keyboard::D) {
-            velocityX = (event.key.code == sf::Keyboard::A) ? -1.0f : 1.0f;
+            velocityX = (event.key.code == sf::Keyboard::A) ? -0.2f : 0.2f;
             cout  ((event.key.code == sf::Keyboard::A) ? "A" : "D") << '\n';
             direction = (event.key.code == sf::Keyboard::A) ? 0 : 1;
         }
