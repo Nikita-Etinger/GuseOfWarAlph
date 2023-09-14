@@ -7,6 +7,9 @@ Map::Map(sf::RenderWindow& windowS) :window(windowS),needClose(false)
 
 void Map::loadMapFromFile()
 {
+    backGroundTexture.loadFromFile("background.png");
+    backGroundSprite.setTexture(backGroundTexture);
+    backGroundSprite.setScale(2.5f, 1.5f);
     std::ifstream inFile("map.txt");
 
     if (inFile.is_open()) {
@@ -73,21 +76,63 @@ void Map::updateMapTexture()
     }
     mapTexture.clear(sf::Color::Transparent); // Очищаем текстуру
 
+    
     for (int x = 0; x < map.size(); ++x) {
         for (int y = 0; y < map[x].size(); ++y) {
             int value = map[x][y];
-            if (value >= 0 && value <= 2) {
+            if (value == 1 || value == 2) {
                 sf::RectangleShape block(sf::Vector2f(BLOCK_SIZE, BLOCK_SIZE));
                 block.setPosition(y * BLOCK_SIZE, (map.size() - x - 1) * BLOCK_SIZE);
-                block.setFillColor(colors[value - 1]);
-                //block.setFillColor((value >= 1 && value <= 2) ? colors[value - 1] : sf::Color::Black);
-                //block.setOutlineThickness(1);
+
+                // Вычисляем количество блоков над текущим блоком
+                int blocksAbove = 0;
+                for (int i = x - 1; i >= 0; --i) {
+                    if (map[i][y] > 0 && map[i][y] <= 2) {
+                        ++blocksAbove;
+                    }
+                    else {
+                        break; // Прекращаем подсчет, если встречаем другой тип блока
+                    }
+                }
+
+                // Вычисляем количество блоков под текущим блоком
+                int blocksBelow = 99;
+                //bool ignore = 0;
+                //for (int i = x + 1; i < map.size(); ++i) {
+
+                //    if (map[i][y] > 0 && map[i][y] <= 2) {
+                //        ++blocksBelow;
+                //    }
+
+                //    else {
+                //        break;
+                //    }
+                //}
+
+                int r, g, b;
+                int colorReduction;
+
+                    colorReduction = std::min(blocksAbove, blocksBelow) * 15; // Примерный коэффициент для уменьшения цвета
+
+                if (value == 1) {
+                    r = std::max(0, 189 - colorReduction); // Минимальное значение R - 0
+                    g = std::max(0, 183 - colorReduction); // Минимальное значение G - 0
+                    b = std::max(0, 107 - colorReduction); // Минимальное значение B - 0
+                }
+                else {
+                    r = std::max(0, 34 - colorReduction); // Минимальное значение R - 0
+                    g = std::max(0, 139 - colorReduction); // Минимальное значение G - 0
+                    b = std::max(0, 34 - colorReduction); // Минимальное значение B - 0
+                }
+
+                block.setFillColor(sf::Color(r, g, b));
                 mapTexture.draw(block); // Рисуем блоки на текстуре
             }
         }
     }
     mapSprite.setTexture(mapTexture.getTexture()); // Устанавливаем текстуру из буфера на спрайт
 }
+
 
 void Map::applyPhysics() {
 
@@ -110,7 +155,7 @@ void Map::applyPhysics() {
             }
         }
 
-        if (hasBlocksReachedBottom) {
+        if (/*hasBlocksReachedBottom*/1) {
             for (int x = map.size() - 1; x > 0; --x) {
                 for (int y = 0; y < map[x].size(); ++y) {
                     if (map[x][y] == 2) {
@@ -145,11 +190,14 @@ void Map::applyPhysics() {
 
 }
 void Map::drawMap() {
+    window.draw(backGroundSprite);
     if (needUpdateMap) {
         applyPhysics();
+        std::cout << "update map" << '\n';
         updateMapTexture();
     }
     window.draw(mapSprite);
+    
 
 
 }

@@ -12,6 +12,8 @@ public:
     virtual void explosion(vt coordinate, float radius);
 
 protected:
+    sf::Sprite backGroundSprite;
+    sf::Texture backGroundTexture;
     sf::RenderTexture mapTexture;
     sf::Sprite mapSprite;
     sf::RenderWindow& window;
@@ -20,7 +22,7 @@ protected:
     bool needClose;
     std::vector<Button> buttons;
     bool needUpdateMap=false;
-    sf::Color colors[9]{ sf::Color::Yellow,
+    sf::Color colors[9]{ sf::Color::Color(255, 250, 205),
         sf::Color::Green,
         sf::Color::Red,
         sf::Color::Blue,
