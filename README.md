@@ -33,6 +33,11 @@
 ![Sprite-0002](https://github.com/Nikita-Etinger/GuseGame-worm-/assets/113473133/b64c4993-f4e2-47c6-b1a6-2681e3aa83fe)
 - **Общая визуализация игры(реализованно).**
 ![image](https://github.com/Nikita-Etinger/GuseOfWarAlph/assets/113473133/ed5c2bf6-ec33-4116-85ae-cee4e30b5495)
+![image](https://github.com/Nikita-Etinger/GuseOfWarAlph/assets/113473133/73e8993a-fdde-48c8-80a9-6a69622c7680)
+![image](https://github.com/Nikita-Etinger/GuseOfWarAlph/assets/113473133/304b83ba-1556-4206-9515-ef2034334ce8)
+![image](https://github.com/Nikita-Etinger/GuseOfWarAlph/assets/113473133/bfee09a8-b0d8-422e-972f-6b01cd119d7d)
+
+
 
 ## Классы
 - **Класс "Game" (Игра)**: Главный класс, который управляет ходом игры, включая инициализацию, обработку ввода, обновление состояния и отрисовку.
