@@ -15,12 +15,14 @@ public:
     
 
 private:
-    
+    std::vector<Particles> particlesF;
     std::vector<Projectile> projectile;
     std::vector<Player> players;
     void handleEvents();
-
-
+    float stabilityTimeMin = 0;
+    float stabilityTimeMax = 0;
+    float stabilityTimeSr = 0;
+    int indexPlayer = 0;
     void update();
     void render();
 
@@ -29,5 +31,6 @@ private:
     bool flagUpdate = 1;
     void scanCollicionProjectile();
 
+    bool needClose = 0;
 };
 

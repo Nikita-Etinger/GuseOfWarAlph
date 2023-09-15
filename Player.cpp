@@ -4,15 +4,23 @@
 #define cout std::cout<<
 
 const float gravity = 1.5f;
-Player::Player(std::vector<std::vector<int>>& mapS, sf::RenderWindow& windowS, bool com, int newPlayerId, std::string newName, std::vector<Projectile>& projectileS,float& time)
-    : command(com), map(mapS), window(windowS), playerId(newPlayerId), playerName(newName), projectile(projectileS),timeF(time) {
+Player::Player(std::vector<std::vector<int>>& mapS, sf::RenderWindow& windowS, bool com, int newPlayerId, std::string newName, std::vector<Projectile>& projectileS,float& time, std::vector<Particles>& particles)
+    : command(com), map(mapS), window(windowS), playerId(newPlayerId), playerName(newName), projectile(projectileS),timeF(time), particlesF(particles) {
 
 
         playerSize = 5;
         coorectCollision = playerSize/2;
-        posX = 10;
-        posX = rand() % (map[0].size() - playerSize);;
-        posY = 10;
+        posY = rand() % (map.size() - playerSize);
+        posX = rand() % (map[0].size() - playerSize);
+        while (!ScanPosition()) {
+            posY = rand() % (map.size() - playerSize);
+            posX = rand() % (map[0].size() - playerSize);
+
+        }
+        while (ScanPosition()) {
+            posY++;
+        }
+        posY--;
         PlacePositionOnMap();
     if (!playerTexture.loadFromFile("guse.png")) {
         cout "error load guse.png" << '\n';
@@ -93,6 +101,7 @@ void Player::applyVelocity() {
     // Если игрок на земле, сбросить ускорение по Y
     if (onGround) {
         velocityY = 0.0f;
+
     }
     else {
         
@@ -139,14 +148,25 @@ void Player::applyVelocity() {
 bool Player::isOnGround() {
     if (posY + 2 >= map.size()) { //игрок достиг конца карты по Y
         cout "XXXXXXXXXXXX" << '\n';
+        if (distanceFall > 2) {
+            hit(distanceFall);
+        }
+        distanceFall = 0;
         return true;
     }
 
     // Проверяем, есть ли блоки под игроком в пределах его горизонтальной ширины
     for (int i = -coorectCollision; i <= coorectCollision; i++) {
-        if (map[posY + coorectCollision+1][posX + i] > 0) return true;
+        if (map[posY + coorectCollision + 1][posX + i] > 0) {
+            if (distanceFall >2) {
+                hit(distanceFall);
+            }
+            distanceFall = 0;
+            return true;
+        }
     }
-
+    distanceFall++;
+    
     return false;
 }
 int Player::getId() {
@@ -206,7 +226,7 @@ void Player::drawHpName() {
     playerNameHpText.setString(hpNameString);
 
     // Положение текста будет зависеть от позиции игрока и размера шрифта
-    playerNameHpText.setPosition(posX * BLOCK_SIZE, (posY - 1) * BLOCK_SIZE - playerNameHpText.getLocalBounds().height - BLOCK_SIZE * 2);
+    playerNameHpText.setPosition(posX * BLOCK_SIZE, (posY - 1) * BLOCK_SIZE - playerNameHpText.getLocalBounds().height - BLOCK_SIZE * 4);
 
     // Отрисовываем текстовое отображение на окне
     window.draw(playerNameHpText);
@@ -216,9 +236,15 @@ void Player::drawPlayer() {
     float corretSpriteSize = 1.5f;
     // Установим центр вращения спрайта в его середину
     playerSprite.setOrigin(playerSprite.getLocalBounds().width / 2, playerSprite.getLocalBounds().height / 2);
+    if (hp > 0) {
+        playerSprite.setScale(corretSpriteSize, corretSpriteSize); // Устанавливаем масштаб по обеим осям
+        playerSprite.setPosition(vt(posX * BLOCK_SIZE, posY * BLOCK_SIZE - BLOCK_SIZE * 2));
+    }
+    else {
+        playerSprite.setScale(-corretSpriteSize, -corretSpriteSize); // Устанавливаем масштаб по обеим осям
+        playerSprite.setPosition(vt(posX * BLOCK_SIZE, posY * BLOCK_SIZE - BLOCK_SIZE * 2));
+    }
 
-    playerSprite.setScale(corretSpriteSize, corretSpriteSize); // Устанавливаем масштаб по обеим осям
-    playerSprite.setPosition(vt(posX * BLOCK_SIZE, posY * BLOCK_SIZE));
 
     if (!direction) {
         // Отражаем спрайт по горизонтали (влево)
@@ -236,19 +262,112 @@ void Player::drawPlayer() {
 // 
 // 
 // 
-void Player::update()
+bool Player::getEndTurn() {
+    return turnOff;
+}
+void Player::update(bool turn)
 {
-
-    if (stage == 1) {
-        drawAim();
+    if (timeF > stabilityTimeMax) stabilityTimeMax = timeF;
+    if (timeF < stabilityTimeMin)stabilityTimeMin = timeF;
+    stabilityTimeSr = (stabilityTimeMax + stabilityTimeMin) / 2;
+    if (turn) {
+        if (stage == 1) {
+            //drawAim();
+            drawPower();
+        }
     }
     drawHpName();
     drawPlayer();
-    drawCenter();
+    //drawCenter();
     applyVelocity();
 }
 void Player::drawPower() {
+    // Создайте задний прямоугольник (черный)
+    sf::RectangleShape backPower;
+    backPower.setFillColor(sf::Color::Transparent); // Прозрачный цвет
+    backPower.setOutlineColor(sf::Color::Black); // Цвет границы
+    backPower.setOutlineThickness(2);
 
+    // Создайте передний прямоугольник (красный)
+    sf::RectangleShape frontPower;
+    frontPower.setFillColor(sf::Color::Red);
+
+    // Размеры прямоугольников
+    int powerSize = playerSize * 20/100*powerShot;
+    sf::Vector2f size(playerSize*20 , playerSize);
+
+    // Установите размеры и позиции прямоугольников
+    backPower.setSize(sf::Vector2f(playerSize * 20, playerSize));
+    frontPower.setSize(sf::Vector2f(powerSize, playerSize));
+
+    // Установите центр вращения прямоугольников в левый центральный угол
+    backPower.setOrigin(0, size.y / 2);
+    frontPower.setOrigin(0, size.y / 2);
+
+    // Вычислите угол в радианах на основе directionShot
+    float angleRad = directionShot * 3.14159265f / 180.0f;
+
+    // Установите поворот прямоугольников на вычисленный угол
+    backPower.setRotation(angleRad * 180.0f / 3.14159265f);
+    frontPower.setRotation(angleRad * 180.0f / 3.14159265f);
+
+    // Установите позиции прямоугольников над игроком
+    sf::Vector2f playerPosition = vt(posX * BLOCK_SIZE, posY * BLOCK_SIZE );
+    backPower.setPosition(playerPosition.x, playerPosition.y - playerSize*5);
+    frontPower.setPosition(playerPosition.x, playerPosition.y - playerSize * 5);
+    std::vector<sf::CircleShape> circles;
+    // угол directionShot в радианы
+
+
+    //конвертер диапазона
+    ////////////////////////////////////////////////////////////////////////
+    //входной и выходной диапазоны
+    float inputMin = 5.0f;
+    float inputMax = 100.0f;
+    float outputMin = 0.1f;
+    float outputMax = 0.4f;
+
+
+    float inputValue = powerShot;
+
+
+    float inputRange = inputMax - inputMin;
+    float outputRange = outputMax - outputMin;
+    float outputValue = ((inputValue - inputMin) / inputRange) * outputRange + outputMin;
+
+
+    ////////////////////////////////////////////////////////////////////
+
+   // Вычислите компоненты velocityX и velocityY на основе угла
+    float projectileSpeed = outputValue;
+    float velocityXPr = projectileSpeed * std::cos(angleRad);
+    float velocityYPr = projectileSpeed * std::sin(angleRad);
+    float positionX = posX;
+    float positionY = posY - playerSize;
+    for (int i = 0; i < map[0].size(); i++) {
+
+
+
+                // Обновляем позицию снаряда на основе скорости
+                positionX += velocityXPr * projectileSpeed* stabilityTimeSr;
+                positionY += velocityYPr * projectileSpeed * stabilityTimeSr;
+                velocityYPr += 0.000999f;
+                sf::CircleShape circlesss(5);
+                circlesss.setPosition(vt(positionX*BLOCK_SIZE, positionY * BLOCK_SIZE-playerSize));
+                circles.push_back(circlesss);
+
+    }
+
+    bool flag = 0;
+    for (auto& circ : circles) {
+        if (flag) {
+            window.draw(circ);
+        }
+        flag = !flag;
+    }
+    // Отрисуйте прямоугольники
+    window.draw(backPower);
+    window.draw(frontPower);
 }
 void Player::drawCenter() {
     // Радиус прицела
@@ -275,53 +394,100 @@ void Player::drawCenter() {
 }
 
 //direction 0-игрок направлен влево,1-вправо
-void Player::handlerEvent(sf::Event& event) {
-    if (event.key.code == sf::Keyboard::Enter) {
-        stage++;
-        if (stage == 4) {
-            turnOff = 1;
-            return;
-        }
-    }
+void Player::handlerEvent(sf::Event& event) { 
+    if (stage <= 1) {
+        if (event.key.code == sf::Keyboard::Enter) {
+            stage++;
+            if (stage == 2) {
+                turnOff = 1;
+                // угол directionShot в радианы
+                float angleRad = directionShot * 3.14159265f / 180.0f;
 
-    if (stage == 0) {
-        if (event.key.code == sf::Keyboard::A || event.key.code == sf::Keyboard::D) {
-            velocityX = (event.key.code == sf::Keyboard::A) ? -0.2f : 0.2f;
-            cout  ((event.key.code == sf::Keyboard::A) ? "A" : "D") << '\n';
-            direction = (event.key.code == sf::Keyboard::A) ? 0 : 1;
+                //конвертер диапазона
+                ////////////////////////////////////////////////////////////////////////
+                //входной и выходной диапазоны
+                float inputMin = 5.0f;
+                float inputMax = 100.0f;
+                float outputMin = 0.1f;
+                float outputMax = 0.4f;
+
+
+                float inputValue = powerShot;
+
+
+                float inputRange = inputMax - inputMin;
+                float outputRange = outputMax - outputMin;
+                float outputValue = ((inputValue - inputMin) / inputRange) * outputRange + outputMin;
+
+
+                ////////////////////////////////////////////////////////////////////
+
+               // Вычислите компоненты velocityX и velocityY на основе угла
+                float projectileSpeed = outputValue; 
+                float velocityXPr = projectileSpeed * std::cos(angleRad);
+                float velocityYPr = projectileSpeed * std::sin(angleRad);
+
+
+
+                // Создайте снаряд с вычисленными компонентами
+                projectile.push_back(Projectile(posX, posY-playerSize, velocityXPr, velocityYPr, 0.2f, stabilityTimeSr, particlesF));
+                return;
+            }
+             
         }
-    }
-    else if (stage == 1) {
-        if (event.key.code == sf::Keyboard::A || event.key.code == sf::Keyboard::D) {
-            if (event.key.code == sf::Keyboard::A) {
-                directionShot -= 10;
-                if (directionShot < 0) {
-                    directionShot = 360;
+        else if (event.key.code == sf::Keyboard::BackSpace) {
+            stage--;
+            if (stage == -1) stage = 0;
+        }
+
+        if (stage == 0) {
+            if (event.key.code == sf::Keyboard::A || event.key.code == sf::Keyboard::D) {
+                velocityX = (event.key.code == sf::Keyboard::A) ? -0.2f : 0.2f;
+                cout((event.key.code == sf::Keyboard::A) ? "A" : "D") << '\n';
+                direction = (event.key.code == sf::Keyboard::A) ? 0 : 1;
+            }
+        }
+        else if (stage == 1) {
+            if (event.key.code == sf::Keyboard::A || event.key.code == sf::Keyboard::D|| event.key.code == sf::Keyboard::W|| event.key.code == sf::Keyboard::S) {
+                if (event.key.code == sf::Keyboard::A) {
+                    directionShot -= 5;
+                    if (directionShot < 0) {
+                        directionShot = 360;
+                    }
+                }
+                else if (event.key.code == sf::Keyboard::D){
+
+                    directionShot += 5;
+                    if (directionShot > 360) {
+                        directionShot = 0;
+                    }
+                }
+                else if (event.key.code == sf::Keyboard::S) {
+                    powerShot--;
+                    if (powerShot < 5)powerShot = 5;
+
+                }
+                else if (event.key.code == sf::Keyboard::W) {
+                    powerShot++;
+                    if (powerShot > 100)powerShot = 100;
                 }
             }
-            else {
+        }
+        else if (stage == 2) {
 
-                directionShot += 10;
-                if (directionShot > 360) {
-                    directionShot = 0;
-                }
-            }
-        }
-    }
-    else if (stage == 2) {
-        if (event.key.code == sf::Keyboard::A) {
-            powerShot--;
-            if (powerShot < 5)powerShot = 5;
-        }
-        else if (event.key.code == sf::Keyboard::D) {
-            powerShot++;
-            if (powerShot > 100)powerShot = 100;
         }
     }
 }
 
 void Player::hit(float hitCount) {
     //получение урона
-    hp -= hitCount;
+        // Форматируем здоровье с одним знаком после запятой
+    if (hitCount != 0.0f) {
+        std::stringstream hpStream;
+        hpStream << std::fixed << std::setprecision(1) << hitCount / 2;
+        std::string hpString = hpStream.str();
+        particlesF.push_back(Particles(3, posX, posY , timeF, hpString));
+        hp -= hitCount / 2;
+    }
 }
 

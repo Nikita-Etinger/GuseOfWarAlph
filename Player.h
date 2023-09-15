@@ -18,6 +18,7 @@ private:
 	sf::Sprite playerSprite;
 	sf::RenderWindow& window;
 	std::vector<std::vector<int>>& map;
+	std::vector<Particles>& particlesF;
 	float hp = 100;
 	float velocityX = 0;
 	float velocityY = 0;
@@ -48,12 +49,15 @@ private:
 	void PlacePositionOnMap();
 	bool ScanPosition();
 	int coorectCollision = 0;//корректировка колизии персонажа 
-
+	int distanceFall = 0;
+	float stabilityTimeMin = 0;
+	float stabilityTimeMax = 0;
+	float stabilityTimeSr = 0;
 public:
 	bool scanContactProjectile(float radius, vt coordinatePr);
-	Player(std::vector<std::vector<int>>& mapS, sf::RenderWindow& windowS, bool com, int newPlayerId, std::string newName, std::vector<Projectile>& projectileS,float& time);
+	Player(std::vector<std::vector<int>>& mapS, sf::RenderWindow& windowS, bool com, int newPlayerId, std::string newName, std::vector<Projectile>& projectileS,float& time , std::vector<Particles>& particles);
 	~Player();
-	void update();
+	void update(bool turn);
 	void handlerEvent(sf::Event& event);
 	void applyVelocity();
 	int getId();
@@ -61,6 +65,7 @@ public:
 	float getY();
 	void hit(float radius);
 	void resetStage();
+	bool getEndTurn();
 
 };
 

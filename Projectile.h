@@ -1,9 +1,6 @@
 #pragma once
-#include "Config.h"
-#include <vector>
-#include <SFML/Graphics.hpp>
-#include <iostream>
 
+#include "Particles.h"
 
 
 class Projectile
@@ -14,16 +11,20 @@ private:
     float velocityX;
     float velocityY;
     float speed;
-    float radius=5;
+    float radius=10;
     int size=3;
     float positionX = 0;
 
     float positionY=0;
-    
 
-
+    sf::Sprite sprite;
+    sf::Texture texture;
+    float rotation;
+    std::vector<Particles>& particlesF;
+    float timeLeft = 0;
 public:
-    Projectile(float positionX, float positionY, float velocityXS, float velocityYS, float speed,float& time);
+    bool isActive();
+    Projectile(float positionX, float positionY, float velocityXS, float velocityYS, float speed,float& time, std::vector<Particles>& particles);
     void applyVelocity();
     void update();
     bool getStatus();
@@ -32,5 +33,8 @@ public:
     int getSize();
     void explosions();
     void draw(sf::RenderWindow& window);
-    
+    bool operator==(Projectile& other);
+    bool operator!=(Projectile& other);
+    //копирование только ссылки
+    //void operator=(Projectile& other);
 };
