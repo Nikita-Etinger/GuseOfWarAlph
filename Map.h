@@ -10,7 +10,7 @@ public:
 
     virtual void run()=0;
     virtual void explosion(vt coordinate, float radius);
-
+    bool mapUpdateComlite = 0;
 protected:
     sf::Sprite backGroundSprite;
     sf::Texture backGroundTexture;
@@ -45,7 +45,7 @@ protected:
 
     //реализация у наследников
     virtual void update() = 0;
-    virtual void render() = 0;
+    //virtual void render() = 0;
     virtual void handleEvents() = 0;
 
     

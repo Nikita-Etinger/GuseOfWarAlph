@@ -35,6 +35,7 @@ public:
     void draw(sf::RenderWindow& window);
     bool operator==(Projectile& other);
     bool operator!=(Projectile& other);
+    void outOfMap();
     //копирование только ссылки
     //void operator=(Projectile& other);
 };

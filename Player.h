@@ -27,8 +27,18 @@ private:
 	int stage = 0;// 0- движение,1-выбор направления,2- выбор силы выстрела,4 конец хода
 
 	sf::Text textPlayer;// вывод здоровья и имени
+
+
 	float powerShot = 0;
+	std::vector<sf::CircleShape> circles;
+	float projectileSpeed;
+	float velocityXPr;
+	float velocityYPr;
+	float positionX;
+	float positionY;
 	float directionShot;
+
+
 	int playerId;
 	std::string playerName;
 	float posX;
@@ -41,6 +51,7 @@ private:
 	bool turnOff = 0;
 	void drawAim();
 	void drawHpName();
+
 	void drawPower();
 	void drawPlayer();
 	float correctAimX = 0;
@@ -50,11 +61,10 @@ private:
 	bool ScanPosition();
 	int coorectCollision = 0;//корректировка колизии персонажа 
 	int distanceFall = 0;
-	float stabilityTimeMin = 0;
-	float stabilityTimeMax = 0;
-	float stabilityTimeSr = 0;
 public:
+
 	bool scanContactProjectile(float radius, vt coordinatePr);
+
 	Player(std::vector<std::vector<int>>& mapS, sf::RenderWindow& windowS, bool com, int newPlayerId, std::string newName, std::vector<Projectile>& projectileS,float& time , std::vector<Particles>& particles);
 	~Player();
 	void update(bool turn);

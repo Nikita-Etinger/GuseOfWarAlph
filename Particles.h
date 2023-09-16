@@ -22,6 +22,7 @@ private:
     sf::Texture texture;
     sf::Text text;
     sf::Font font;
+    int randSize;
 
 public:
 

@@ -70,7 +70,7 @@ bool Player::scanContactProjectile(float radius, sf::Vector2f coordinatePr)
         // Снаряд долетел до игрока, отбрасываем игрока 
         (posX < coordinatePr.x) ? accelerationX -= distance / 10 : accelerationX += distance / 10;
         accelerationY -= distance / 10;
-        cout "EXPLOSION" << " POWER" << distance / 10 << '\n';
+        /*cout "EXPLOSION" << " POWER" << distance / 10 << '\n';*/
         hit(radius);
         return true;
     }
@@ -147,7 +147,7 @@ void Player::applyVelocity() {
 
 bool Player::isOnGround() {
     if (posY + 2 >= map.size()) { //игрок достиг конца карты по Y
-        cout "XXXXXXXXXXXX" << '\n';
+        //cout "XXXXXXXXXXXX" << '\n';
         if (distanceFall > 2) {
             hit(distanceFall);
         }
@@ -267,9 +267,9 @@ bool Player::getEndTurn() {
 }
 void Player::update(bool turn)
 {
-    if (timeF > stabilityTimeMax) stabilityTimeMax = timeF;
-    if (timeF < stabilityTimeMin)stabilityTimeMin = timeF;
-    stabilityTimeSr = (stabilityTimeMax + stabilityTimeMin) / 2;
+    //if (timeF > stabilityTimeMax) stabilityTimeMax = timeF;
+    //if (timeF < stabilityTimeMin)stabilityTimeMin = timeF;
+    //stabilityTimeSr = (stabilityTimeMax + stabilityTimeMin) / 2;
     if (turn) {
         if (stage == 1) {
             //drawAim();
@@ -304,70 +304,23 @@ void Player::drawPower() {
     backPower.setOrigin(0, size.y / 2);
     frontPower.setOrigin(0, size.y / 2);
 
-    // Вычислите угол в радианах на основе directionShot
+     //Вычислите угол в радианах на основе directionShot
     float angleRad = directionShot * 3.14159265f / 180.0f;
 
     // Установите поворот прямоугольников на вычисленный угол
     backPower.setRotation(angleRad * 180.0f / 3.14159265f);
     frontPower.setRotation(angleRad * 180.0f / 3.14159265f);
 
-    // Установите позиции прямоугольников над игроком
+     //Установите позиции прямоугольников над игроком
     sf::Vector2f playerPosition = vt(posX * BLOCK_SIZE, posY * BLOCK_SIZE );
     backPower.setPosition(playerPosition.x, playerPosition.y - playerSize*5);
     frontPower.setPosition(playerPosition.x, playerPosition.y - playerSize * 5);
-    std::vector<sf::CircleShape> circles;
-    // угол directionShot в радианы
-
-
-    //конвертер диапазона
-    ////////////////////////////////////////////////////////////////////////
-    //входной и выходной диапазоны
-    float inputMin = 5.0f;
-    float inputMax = 100.0f;
-    float outputMin = 0.1f;
-    float outputMax = 0.4f;
-
-
-    float inputValue = powerShot;
-
-
-    float inputRange = inputMax - inputMin;
-    float outputRange = outputMax - outputMin;
-    float outputValue = ((inputValue - inputMin) / inputRange) * outputRange + outputMin;
-
-
-    ////////////////////////////////////////////////////////////////////
-
-   // Вычислите компоненты velocityX и velocityY на основе угла
-    float projectileSpeed = outputValue;
-    float velocityXPr = projectileSpeed * std::cos(angleRad);
-    float velocityYPr = projectileSpeed * std::sin(angleRad);
-    float positionX = posX;
-    float positionY = posY - playerSize;
-    for (int i = 0; i < map[0].size(); i++) {
+    
 
 
 
-                // Обновляем позицию снаряда на основе скорости
-                positionX += velocityXPr * projectileSpeed* stabilityTimeSr;
-                positionY += velocityYPr * projectileSpeed * stabilityTimeSr;
-                velocityYPr += 0.000999f;
-                sf::CircleShape circlesss(5);
-                circlesss.setPosition(vt(positionX*BLOCK_SIZE, positionY * BLOCK_SIZE-playerSize));
-                circles.push_back(circlesss);
-
-    }
-
-    bool flag = 0;
-    for (auto& circ : circles) {
-        if (flag) {
-            window.draw(circ);
-        }
-        flag = !flag;
-    }
-    // Отрисуйте прямоугольники
-    window.draw(backPower);
-    window.draw(frontPower);
+   window.draw(backPower);
+   window.draw(frontPower);
 }
 void Player::drawCenter() {
     // Радиус прицела
@@ -430,7 +383,7 @@ void Player::handlerEvent(sf::Event& event) {
 
 
                 // Создайте снаряд с вычисленными компонентами
-                projectile.push_back(Projectile(posX, posY-playerSize, velocityXPr, velocityYPr, 0.2f, stabilityTimeSr, particlesF));
+                projectile.push_back(Projectile(posX, posY-playerSize, velocityXPr, velocityYPr, 0.2f, timeF, particlesF));
                 return;
             }
              
@@ -443,7 +396,7 @@ void Player::handlerEvent(sf::Event& event) {
         if (stage == 0) {
             if (event.key.code == sf::Keyboard::A || event.key.code == sf::Keyboard::D) {
                 velocityX = (event.key.code == sf::Keyboard::A) ? -0.2f : 0.2f;
-                cout((event.key.code == sf::Keyboard::A) ? "A" : "D") << '\n';
+                /*cout((event.key.code == sf::Keyboard::A) ? "A" : "D") << '\n';*/
                 direction = (event.key.code == sf::Keyboard::A) ? 0 : 1;
             }
         }

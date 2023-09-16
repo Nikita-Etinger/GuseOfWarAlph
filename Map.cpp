@@ -97,17 +97,7 @@ void Map::updateMapTexture()
 
                 // Вычисляем количество блоков под текущим блоком
                 int blocksBelow = 99;
-                //bool ignore = 0;
-                //for (int i = x + 1; i < map.size(); ++i) {
 
-                //    if (map[i][y] > 0 && map[i][y] <= 2) {
-                //        ++blocksBelow;
-                //    }
-
-                //    else {
-                //        break;
-                //    }
-                //}
 
                 int r, g, b;
                 int colorReduction;
@@ -135,70 +125,69 @@ void Map::updateMapTexture()
 
 
 void Map::applyPhysics() {
+    while (needClose == 0) {
+        if (mapBuf != map) {
 
 
-    
 
-        mapBuf = map;
-        bool hasBlocksReachedBottom = false;
+            mapBuf = map;
+            bool hasBlocksReachedBottom = false;
 
-        for (int x = map.size() - 1; x > 0; --x) {
-            for (int y = 0; y < map[x].size(); ++y) {
-                if (map[x][y] == 2) {
-
-                }
-                else if (map[x][y] > 0 && x < map.size() - 1 && map[x + 1][y] == 0) {
-                    map[x + 1][y] = map[x][y];
-                    map[x][y] = 0;
-                    hasBlocksReachedBottom = true;
-                }
-            }
-        }
-
-        if (/*hasBlocksReachedBottom*/1) {
             for (int x = map.size() - 1; x > 0; --x) {
                 for (int y = 0; y < map[x].size(); ++y) {
                     if (map[x][y] == 2) {
 
                     }
-                    else if (map[x][y] > 0 && x < map.size() - 1) {
-                        if (y > 0 && map[x + 1][y] > 0 && map[x + 1][y - 1] == 0) {
-                            map[x + 1][y - 1] = map[x][y];
-                            map[x][y] = 0;
+                    else if (map[x][y] > 0 && x < map.size() - 1 && map[x + 1][y] == 0) {
+                        map[x + 1][y] = map[x][y];
+                        map[x][y] = 0;
+                        hasBlocksReachedBottom = true;
+                    }
+                }
+            }
+
+            if (/*hasBlocksReachedBottom*/1) {
+                for (int x = map.size() - 1; x > 0; --x) {
+                    for (int y = 0; y < map[x].size(); ++y) {
+                        if (map[x][y] == 2) {
+
                         }
-                        else if (y < map[x].size() - 1 && map[x + 1][y] > 0 && map[x + 1][y + 1] == 0) {
-                            map[x + 1][y + 1] = map[x][y];
-                            map[x][y] = 0;
-                        }
-                        else if (map[x + 1][y] == 0) {
-                            map[x + 1][y] = map[x][y];
-                            map[x][y] = 0;
+                        else if (map[x][y] > 0 && x < map.size() - 1) {
+                            if (y > 0 && map[x + 1][y] > 0 && map[x + 1][y - 1] == 0) {
+                                map[x + 1][y - 1] = map[x][y];
+                                map[x][y] = 0;
+                            }
+                            else if (y < map[x].size() - 1 && map[x + 1][y] > 0 && map[x + 1][y + 1] == 0) {
+                                map[x + 1][y + 1] = map[x][y];
+                                map[x][y] = 0;
+                            }
+                            else if (map[x + 1][y] == 0) {
+                                map[x + 1][y] = map[x][y];
+                                map[x][y] = 0;
+                            }
                         }
                     }
                 }
             }
+
+            if (mapBuf == map) {//проверка на отличие 
+                needUpdateMap = 0;
+                std::cout << "MapTexture UpdateComlite" << "\n";
+            }
+
+            mapUpdateComlite = 1;
         }
         
-        if (mapBuf == map) {//проверка на отличие 
-            needUpdateMap = 0;
-            std::cout << "MapTexture UpdateComlite" << "\n";
-        }
+
+    }
         
-        
-
-
-
 }
 void Map::drawMap() {
-    window.draw(backGroundSprite);
-    if (needUpdateMap) {
-        applyPhysics();
-        std::cout << "update map" << '\n';
-        updateMapTexture();
-    }
-    window.draw(mapSprite);
-    
-
+        window.draw(backGroundSprite);
+        if (1/*mapBuf != map*/) {
+            updateMapTexture();
+        }
+        window.draw(mapSprite);
 
 }
 void Map::explosion(vt coordinate, float radius) {

@@ -25,12 +25,7 @@ Particles::Particles(int type, float positionXS, float positionYS, float& timeF,
 		text.setString(newtext);
 		break;
 	}
-	int r, g, b;
-	int buf = rand() % (50 - 5 + 1) + 5;
-	r = 210-buf;
-	g = 210 - buf;
-	b = 210 - buf;
-	colorVape = sf:: Color(r, g, b);
+	randSize = rand() % 3;
 }
 
 void Particles::update() {
@@ -38,19 +33,15 @@ void Particles::update() {
 		positionY += 0.1f;
 	}
 	timeLive -= 1;
-	//std::cout << "timeLive " << timeLive << std::endl;
-	//if (timeLive<0) {
-
-	//	needDelete = true;
-	//}
+	
 
 }
 bool Particles::getStatus() {
 	return needDelete;
 }
 void Particles::draw(sf::RenderWindow& window) {
-	if (needDelete == false&&timeLive>5) {
-
+	if (timeLive>10) {
+		
 		sizeVape += 1.00001;
 		if (typeS == 1) {
 			
@@ -58,8 +49,8 @@ void Particles::draw(sf::RenderWindow& window) {
 			sprite.setColor(sf::Color(255, 255, 255, timeLive*2));
 			
 		
-			sprite.setOrigin(sf::Vector2f(sizeVape / 2, sizeVape / 2));
-			sprite.setScale(sf::Vector2f(sizeVape/20, sizeVape/20));
+			sprite.setOrigin(sf::Vector2f((sizeVape + randSize) / 2, (sizeVape + randSize) / 2));
+			sprite.setScale(sf::Vector2f((sizeVape + randSize )/20, (sizeVape + randSize) /20));
 
 			sprite.setPosition(sf::Vector2f(positionX * BLOCK_SIZE - 5, positionY * BLOCK_SIZE));
 

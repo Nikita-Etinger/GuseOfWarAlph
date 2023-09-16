@@ -12,6 +12,8 @@ public:
     LandScape(sf::RenderWindow& window);
     std::vector<std::vector<int>>& getMap();
     void run() override;
+
+
     
 
 private:

@@ -1,5 +1,5 @@
 #include "LandScape.h"
-
+#include <thread>
 
 
 LandScape::LandScape(sf::RenderWindow& windows) : Map(windows)
@@ -13,9 +13,12 @@ LandScape::LandScape(sf::RenderWindow& windows) : Map(windows)
 
 void LandScape::run()
 {
-    mapTexture.create(WINDOW_W, WINDOW_H);
-    loadMapFromFile();
-    updateMapTexture();
+
+
+    std::thread myThread([this]() {
+        applyPhysics();
+     });
+    
     buttons.push_back(Button(sf::Vector2f(BUTTON_SIZE, BUTTON_SIZE / 2),
         sf::Vector2f(BUTTON_SIZE * 0, 0),
         sf::Color(130, 78, 100, 255),
@@ -37,20 +40,22 @@ void LandScape::run()
 
     sf::Clock clock;
 
+
+    
     while (window.isOpen()) {
         if (needClose) {
             players.clear();
             projectile.clear();
             particlesF.clear();
             needClose = 0;
+            myThread.detach();
             break;
         }
         time = clock.getElapsedTime().asMicroseconds();
         clock.restart();
-        time = time / 500;
-        //std::cout << "time: " << time << '\n';
-        //update();
+        time = time / 800;
         render();
+
     }
 }
 
@@ -78,11 +83,16 @@ void LandScape::update() {
 
     }
     scanCollicionProjectile();
-
+    //int count = 0;
     for (auto& par : particlesF) {
-        par.update();
-        par.draw(window);
+        
+        if (!par.getStatus()) {
+            //count++;
+            par.update();
+            par.draw(window);
+        }
     }
+    std::cout << projectile.size() << '\n';
 
 }
 void LandScape::render()
@@ -94,19 +104,18 @@ void LandScape::render()
         but.render(window);
     }
     if (particlesF.size()>3) {
-        std::cout << particlesF[particlesF.size() - 2].getStatus() << '\n';
+        /*std::cout << particlesF[particlesF.size() - 2].getStatus() << '\n';*/
         if (particlesF[particlesF.size() - 2].getStatus()) {
             particlesF.clear();
             std::cout << " PART CLEAR" << '\n';
         }
     }
     if (!projectile.empty()) {
-        if (projectile.empty()) {
             if (projectile[projectile.size() - 1].getStatus()) {
                 projectile.clear();
-                std::cout << " PART CLEAR" << '\n';
+                std::cout << " PROJECTILE CLEAR" << '\n';
             }
-        }
+
     }
     update();
     window.display();
@@ -145,13 +154,7 @@ void LandScape::handleEvents()
             }
             // —оздаем снар€д и добавл€ем его в вектор
             projectile.push_back(Projectile(mapX, mapY, 0.1f, -0.1f, 0.5f, time, particlesF));
-            //if (1) {
-            //    for (auto& pl : players) {
-            //        
-            //        /*needUpdateMap = 1;
-            //        flagUpdate=1;*/
-            //    }
-            //}
+
         }
         
 
@@ -167,7 +170,6 @@ void LandScape::scanCollicionProjectile() {
     //как правило снар€д всегда один
     for (auto& pr : projectile) {
         if (!pr.getStatus()) {
-            
             vt positionPr = pr.getCoordinate();
             int sizePr = pr.getSize();
             float radiusPr = pr.getRadius();
@@ -184,7 +186,6 @@ void LandScape::scanCollicionProjectile() {
                     }
 
                 }
-
                 if (exp) {
                     pr.explosions();//мен€ет статус снар€да как взорван
                 }
@@ -192,36 +193,35 @@ void LandScape::scanCollicionProjectile() {
                 if (!exp) {
                     for (int i = -sizePr; i <= sizePr; i++) {
                         for (int j = -sizePr; j <= sizePr; j++) {
+                            int x_check = positionPr.x + i;
+                            int y_check = positionPr.y + j;
 
-                            if (positionPr.x + i < map[0].size() - 2 && positionPr.x + i>1 && positionPr.y + j < map.size() - 2 && positionPr.y + j>1) {
-
-                                if (map[positionPr.y + j][positionPr.x + j] > 0) {
+                            if (x_check >= 1 && x_check < map[0].size() - 1 && y_check >= 1 && y_check < map.size() - 1) {
+                                // ѕроверка на контакт с блоками карты
+                                if (map[y_check][x_check] > 0) {
                                     pr.explosions();
                                     exp = 1;
-                                    std::cout << "BOOM2" << '\n';
+                                    explosion(vt(positionPr.y, positionPr.x), radiusPr);
                                 }
                             }
                             else {
-                                pr.explosions();
+                                // ѕроверка на край карты
+                                pr.outOfMap();
                                 exp = 1;
                             }
-                            if (exp)break;
 
+                            if (exp) break;
                         }
-                        if (exp)break;
+                        if (exp) break;
                     }
                 }
-            }
-
-            if (pr.getStatus()) {
-                //pr.explosions();
-                explosion(vt(positionPr.y, positionPr.x), radiusPr);// создаЄт дыру в месте взрыва
-                
             }
             if (!pr.getStatus()) {
                 pr.update();
                 pr.draw(window);
             }
+
+
         }
         
     }

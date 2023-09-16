@@ -7,45 +7,46 @@ Projectile::Projectile(float positionX, float positionY, float velocityXS, float
     : positionX(positionX), positionY(positionY), velocityX(velocityXS), velocityY(velocityYS), speed(speed), timeF(time), particlesF(particles) {
     rotation = std::atan2(velocityY, velocityX) * 180 / 3.14159265f;
     //std::cout << "Create projectile" << std::endl;
+    texture.loadFromFile("projectile.png");
+    
 }
 
 bool Projectile::isActive() {
     return (timeLeft > 400);
 }
 void Projectile::applyVelocity() {
-    if (!explosion) {
-        // ќбновл€ем вертикальную скорость с учетом гравитации
-        velocityY += gravity;
-    }
+    //if (!explosion) {
+    //    // ќбновл€ем вертикальную скорость с учетом гравитации
+    //    velocityY += gravity;
+    //}
 }
 
 void Projectile::update() {
     timeLeft += timeF;
-    std::cout << "Time: " << timeLeft << "\n";
+    //std::cout << "Time: " << timeLeft << "\n";
     if (!explosion) {
         // ќбновл€ем позицию снар€да на основе скорости
         positionX += velocityX * speed* timeF;
         positionY += velocityY * speed* timeF;
-        bool t= rand() % (1 - 0 + 1) + 0;
-        if(t)particlesF.push_back(Particles(1, positionX, positionY, timeF,""));
+        bool flag = rand() % (1+1);
+        //std::cout << flag << '\n';
+        if(flag)particlesF.push_back(Particles(1, positionX, positionY, timeF, ""));
+
         rotation = std::atan2(velocityY, velocityX) * 180 / 3.14159265f;
         // ќбновл€ем вертикальную скорость с учетом гравитации
         velocityY += gravity;
     }
 }
+void Projectile::outOfMap() {
+    explosion = 1;
+}
 void Projectile::draw(sf::RenderWindow& window) {
     if (!explosion) {
-        sf::RectangleShape rect;
-        rect.setSize(sf::Vector2f(10, 10));
-        rect.setPosition(sf::Vector2f(positionX * BLOCK_SIZE - 2, positionY * BLOCK_SIZE + 5));
-        rect.setFillColor(sf::Color::Yellow);
-        rect.setRotation(rotation);
-        texture.loadFromFile("projectile.png");
+
         sprite.setTexture(texture);
         sprite.setPosition(positionX * BLOCK_SIZE, positionY * BLOCK_SIZE);
         // ”станавливаем угол поворота спрайта
         sprite.setRotation(rotation);
-        window.draw(rect);
         window.draw(sprite);
         
     }

@@ -2,6 +2,7 @@
 
 Game::Game() :window(sf::VideoMode(WINDOW_W, WINDOW_H), "SFML window"),mapEditor(window),backGround(vt(WINDOW_W, WINDOW_H)),landScape(window)
 {
+	window.setFramerateLimit(60);
 }
 
 void Game::actEvent()
