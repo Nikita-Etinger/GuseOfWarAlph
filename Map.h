@@ -4,13 +4,16 @@
 #include <fstream>
 #include "sstream"
 #include "Config.h"
+#include <mutex>
+
 class Map {
 public:
     Map(sf::RenderWindow& windowS);
-
+    std::mutex mutex;
     virtual void run()=0;
     virtual void explosion(vt coordinate, float radius);
     bool mapUpdateComlite = 0;
+    bool needClose;
 protected:
     sf::Sprite backGroundSprite;
     sf::Texture backGroundTexture;
@@ -19,7 +22,7 @@ protected:
     sf::RenderWindow& window;
     std::vector<std::vector<int>> map;
     std::vector<std::vector<int>> mapBuf;
-    bool needClose;
+    
     std::vector<Button> buttons;
     bool needUpdateMap=false;
     sf::Color colors[9]{ sf::Color::Color(255, 250, 205),

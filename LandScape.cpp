@@ -2,21 +2,32 @@
 #include <thread>
 
 
+
 LandScape::LandScape(sf::RenderWindow& windows) : Map(windows)
 {
     map.resize(WINDOW_H / BLOCK_SIZE, std::vector<int>(WINDOW_W / BLOCK_SIZE, 0));
     mapTexture.create(WINDOW_W, WINDOW_H);
-    loadMapFromFile();
-    updateMapTexture();
+
     
 }
-
+bool LandScape::getNeedClose() {
+    return needClose;
+}
 void LandScape::run()
 {
+    
+    {
+        std::lock_guard<std::mutex> lock(mutex);
+        loadMapFromFile();
+    }
+    std::thread myThreadPhysics([this]() {
 
-
-    std::thread myThread([this]() {
         applyPhysics();
+     });
+
+    std::thread myThreadProjectileCollision([this]() {
+        
+        scanCollicionProjectile();
      });
     
     buttons.push_back(Button(sf::Vector2f(BUTTON_SIZE, BUTTON_SIZE / 2),
@@ -44,13 +55,28 @@ void LandScape::run()
     
     while (window.isOpen()) {
         if (needClose) {
-            players.clear();
-            projectile.clear();
-            particlesF.clear();
-            needClose = 0;
-            myThread.detach();
+
+            /*std::cout << "need Close: " << needClose << '\n';*/
+            // «авершаем поток myThread
+            {
+                std::lock_guard<std::mutex> lock(mutex);
+                std::cout << "thread close " << '\n';
+                map.clear();
+                projectile.clear();
+            }
+            myThreadPhysics.join();
+            myThreadProjectileCollision.join();
+
+                // ”станавливаем флаг needClose в 0 (false)
+                needClose = false;
+                // ќчищаем другие ресурсы и выходим из цикла
+                players.clear();
+                projectile.clear();
+                particlesF.clear();
+
             break;
         }
+        std::cout << "Particles size: " << particlesF.size()<<'\n';
         time = clock.getElapsedTime().asMicroseconds();
         clock.restart();
         time = time / 800;
@@ -58,67 +84,87 @@ void LandScape::run()
 
     }
 }
+    
+
 
 
 
 void LandScape::update() {
     handleEvents();
 
+    if (!needClose) {
+        for (int i = 0; i < players.size(); i++) {
+            if (i == indexPlayer) {
+                players[i].update(1);
+                if (players[i].getEndTurn()) {
+                    players[i].resetStage();
+                    indexPlayer++;
+                    if (indexPlayer >= players.size() - 1) {
+                        indexPlayer = 0;
+                    }
 
-    for (int i = 0; i < players.size(); i++) {
-        if (i == indexPlayer) {
-            players[i].update(1);
-            if (players[i].getEndTurn()) {
-                players[i].resetStage();
-                indexPlayer++;
-                if (indexPlayer >= players.size() - 1) {
-                    indexPlayer = 0;
                 }
+            }
+            else {
+                players[i].update(0);
+            }
 
+        }
+
+        //int count = 0;
+        for (auto& par : particlesF) {
+
+            if (!par.getStatus()) {
+                //count++;
+                par.update();
+                par.draw(window);
             }
         }
-        else {
-            players[i].update(0);
-        }
-
+        //std::cout << projectile.size() << '\n';
     }
-    scanCollicionProjectile();
-    //int count = 0;
-    for (auto& par : particlesF) {
-        
-        if (!par.getStatus()) {
-            //count++;
-            par.update();
-            par.draw(window);
-        }
-    }
-    std::cout << projectile.size() << '\n';
 
 }
 void LandScape::render()
 {
     window.clear();
-
-    drawMap();
-    for (auto& but : buttons) {
-        but.render(window);
-    }
-    if (particlesF.size()>3) {
-        /*std::cout << particlesF[particlesF.size() - 2].getStatus() << '\n';*/
-        if (particlesF[particlesF.size() - 2].getStatus()) {
-            particlesF.clear();
-            std::cout << " PART CLEAR" << '\n';
+    if (!needClose) {
+        drawMap();
+        for (auto& but : buttons) {
+            but.render(window);
         }
-    }
-    if (!projectile.empty()) {
+        if (particlesF.size() > 3) {
+            /*std::cout << particlesF[particlesF.size() - 2].getStatus() << '\n';*/
+            if (particlesF[particlesF.size() - 2].getStatus()) {
+                {
+                    std::lock_guard<std::mutex> lock(mutex);
+                    particlesF.clear();
+                }
+                std::cout << " PART CLEAR" << '\n';
+            }
+        }
+        if (!projectile.empty()) {
             if (projectile[projectile.size() - 1].getStatus()) {
-                projectile.clear();
+                {
+                    std::lock_guard<std::mutex> lock(mutex);
+                    projectile.clear();
+                }
                 std::cout << " PROJECTILE CLEAR" << '\n';
             }
 
+            {
+                std::lock_guard<std::mutex> lock(mutex);
+                for (auto& pr : projectile) {
+                        pr.draw(window);
+                }
+            }
+
+        }
+
+        update();
     }
-    update();
-    window.display();
+    if (!needClose) {
+        window.display();
+    }
 }
 
 void LandScape::handleEvents()
@@ -148,12 +194,17 @@ void LandScape::handleEvents()
                 if (x.getRectangle().getGlobalBounds().contains(localPosition)) {
                     std::string str = x.getString();
                     if (str == "EXIT") {
+                        std::lock_guard<std::mutex> lock(mutex);
                         needClose = true;
+                        return;
                     }
                 }
             }
             // —оздаем снар€д и добавл€ем его в вектор
-            projectile.push_back(Projectile(mapX, mapY, 0.1f, -0.1f, 0.5f, time, particlesF));
+            {
+                std::lock_guard<std::mutex> lock(mutex);
+                projectile.push_back(Projectile(mapX, mapY, 0.1f, -0.1f, 0.5f, time, particlesF));
+            }
 
         }
         
@@ -167,63 +218,67 @@ std::vector<std::vector<int>>& LandScape::getMap() {
 
 
 void LandScape::scanCollicionProjectile() {
-    //как правило снар€д всегда один
-    for (auto& pr : projectile) {
-        if (!pr.getStatus()) {
-            vt positionPr = pr.getCoordinate();
-            int sizePr = pr.getSize();
-            float radiusPr = pr.getRadius();
-            bool exp = 0;
-            if (pr.isActive()) {
-                for (auto& pl : players) {
-                    if (pl.scanContactProjectile(radiusPr, positionPr)) {
+    while (!map.empty()) {
+        {
+            std::lock_guard<std::mutex> lock(mutex);
+            //как правило снар€д всегда один, но работает со всеми
+            for (auto& pr : projectile) {
+                if (!pr.getStatus()) {
+                    vt positionPr = pr.getCoordinate();
+                    int sizePr = pr.getSize();
+                    float radiusPr = pr.getRadius();
+                    bool exp = 0;
+                    if (pr.isActive()) {
+                        for (auto& pl : players) {
+                            if (pl.scanContactProjectile(radiusPr, positionPr)) {
 
-                        if (pr.getStatus() == false) {
-                            /*std::cout << "BOOM1" << '\n';*/
-                            exp = 1;
-
-                        }
-                    }
-
-                }
-                if (exp) {
-                    pr.explosions();//мен€ет статус снар€да как взорван
-                }
-                //если взрыва не произашло, провер€етс€ контакт с землЄй
-                if (!exp) {
-                    for (int i = -sizePr; i <= sizePr; i++) {
-                        for (int j = -sizePr; j <= sizePr; j++) {
-                            int x_check = positionPr.x + i;
-                            int y_check = positionPr.y + j;
-
-                            if (x_check >= 1 && x_check < map[0].size() - 1 && y_check >= 1 && y_check < map.size() - 1) {
-                                // ѕроверка на контакт с блоками карты
-                                if (map[y_check][x_check] > 0) {
-                                    pr.explosions();
+                                if (pr.getStatus() == false) {
+                                    /*std::cout << "BOOM1" << '\n';*/
                                     exp = 1;
-                                    explosion(vt(positionPr.y, positionPr.x), radiusPr);
+
                                 }
                             }
-                            else {
-                                // ѕроверка на край карты
-                                pr.outOfMap();
-                                exp = 1;
-                            }
 
-                            if (exp) break;
                         }
-                        if (exp) break;
+                        if (exp) {
+                            pr.explosions();//мен€ет статус снар€да как взорван
+                        }
+                        //если взрыва не произашло, провер€етс€ контакт с землЄй
+                        if (!exp) {
+                            for (int i = -sizePr; i <= sizePr; i++) {
+                                for (int j = -sizePr; j <= sizePr; j++) {
+                                    int x_check = positionPr.x + i;
+                                    int y_check = positionPr.y + j;
+
+                                    if (x_check >= 1 && x_check < map[0].size() - 1 && y_check >= 1 && y_check < map.size() - 1) {
+                                        // ѕроверка на контакт с блоками карты
+                                        if (map[y_check][x_check] > 0) {
+                                            pr.explosions();
+                                            exp = 1;
+                                            explosion(vt(positionPr.y, positionPr.x), radiusPr);
+                                        }
+                                    }
+                                    else {
+                                        // ѕроверка на край карты
+                                        pr.outOfMap();
+                                        exp = 1;
+                                    }
+
+                                    if (exp) break;
+                                }
+                                if (exp) break;
+                            }
+                        }
                     }
+                    if (!pr.getStatus()) {
+                        pr.update();
+                    }
+
+
                 }
-            }
-            if (!pr.getStatus()) {
-                pr.update();
-                pr.draw(window);
-            }
 
-
+            }
         }
-        
     }
 
 

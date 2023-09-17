@@ -19,6 +19,8 @@ void Game::actEvent()
 				std::string str = x.getString();
 				if (str == "PLAY") {
 					landScape.run();
+					window.clear();
+					std::cout << "exit " << '\n';
 				}
 				else if (str == "MAP EDITOR") {
 					mapEditor.run();
@@ -56,7 +58,7 @@ void Game::update() {
 void Game::render() {
 
 	window.clear();
-	
+
 	window.draw(backGround);
 	for (auto& b : buttons) {
 		b.render(window);

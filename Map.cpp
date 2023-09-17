@@ -125,7 +125,16 @@ void Map::updateMapTexture()
 
 
 void Map::applyPhysics() {
-    while (needClose == 0) {
+    while (!map.empty()) {
+        {
+            std::lock_guard<std::mutex> lock(mutex);
+            /*std::cout << "thread no close " << '\n';*/
+            if (needClose) {
+                std::cout << "thread close " << '\n';
+                break;
+            }
+        }
+        
         if (mapBuf != map) {
 
 
@@ -177,11 +186,19 @@ void Map::applyPhysics() {
 
             mapUpdateComlite = 1;
         }
-        
+
+        //std::cout << "thread2 is open "<<"need Close: "<<needClose << '\n';
 
     }
+    
+    if (!map.empty()) {
+        map.clear();
+        
+    }
+    
         
 }
+
 void Map::drawMap() {
         window.draw(backGroundSprite);
         if (1/*mapBuf != map*/) {

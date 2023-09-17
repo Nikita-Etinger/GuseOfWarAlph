@@ -8,11 +8,12 @@ Projectile::Projectile(float positionX, float positionY, float velocityXS, float
     rotation = std::atan2(velocityY, velocityX) * 180 / 3.14159265f;
     //std::cout << "Create projectile" << std::endl;
     texture.loadFromFile("projectile.png");
+    std::cout << "render create" << '\n';
     
 }
 
 bool Projectile::isActive() {
-    return (timeLeft > 400);
+    return (timeLeft > 10);
 }
 void Projectile::applyVelocity() {
     //if (!explosion) {
@@ -23,18 +24,26 @@ void Projectile::applyVelocity() {
 
 void Projectile::update() {
     timeLeft += timeF;
-    //std::cout << "Time: " << timeLeft << "\n";
-    if (!explosion) {
-        // ќбновл€ем позицию снар€да на основе скорости
-        positionX += velocityX * speed* timeF;
-        positionY += velocityY * speed* timeF;
-        bool flag = rand() % (1+1);
-        //std::cout << flag << '\n';
-        if(flag)particlesF.push_back(Particles(1, positionX, positionY, timeF, ""));
+    timeRender += timeF;
+    //std::cout << "Time Render: " << timeRender << '\n';
+    //std::cout << "Time: " << timeF/1000000 << '\n';
+    if (timeRender > 0.5*100) {
 
-        rotation = std::atan2(velocityY, velocityX) * 180 / 3.14159265f;
-        // ќбновл€ем вертикальную скорость с учетом гравитации
-        velocityY += gravity;
+
+        //std::cout << "Time: " << timeLeft << "\n";
+        if (!explosion) {
+            // ќбновл€ем позицию снар€да на основе скорости
+            positionX += velocityX * speed*timeF;
+            positionY += velocityY * speed* timeF ;
+            bool flag = rand() % (1 + 1);
+            //std::cout << flag << '\n';
+            if (flag)particlesF.push_back(Particles(1, positionX, positionY, timeF, ""));
+
+            rotation = std::atan2(velocityY, velocityX) * 180 / 3.14159265f;
+            // ќбновл€ем вертикальную скорость с учетом гравитации
+            velocityY += gravity;
+        }
+        timeRender = 0;
     }
 }
 void Projectile::outOfMap() {

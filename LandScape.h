@@ -14,8 +14,8 @@ public:
     void run() override;
 
 
-    
 
+    bool getNeedClose();
 private:
     std::vector<Particles> particlesF;
     std::vector<Projectile> projectile;

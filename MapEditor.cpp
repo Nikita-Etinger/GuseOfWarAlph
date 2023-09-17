@@ -16,7 +16,7 @@ MapEditor::MapEditor(sf::RenderWindow& windows) : Map(windows)
 
 void MapEditor::run() {
     bool tapButton = false;
-
+    loadMapFromFile();
     for (int i = 0; i < 5; i++) {
         buttons.push_back(Button(sf::Vector2f(BUTTON_SIZE, BUTTON_SIZE / 2),
             sf::Vector2f(BUTTON_SIZE * i, 0),
@@ -34,7 +34,9 @@ void MapEditor::run() {
         if (needClose) {
             saveMapToFile();
             needClose = false;
+            paintType = 0;
             saveMapToFile();
+            buttons.clear();
             return;
         }
         
@@ -80,10 +82,12 @@ void MapEditor::handleEvents() {
                         if (str == "SAVE") {
                             needClose = true;
                             tapButton = true;
+                            cout "SAVE" << '\n';
                         }
                         else if (str == "PREV") {
                             paintType--;
                             if (paintType < 0) paintType = 2;
+                            cout "PREV" << '\n';
                             tapButton = true;
                         }
                         else if (str == "NEXT") {
@@ -94,6 +98,7 @@ void MapEditor::handleEvents() {
 
                         }
                         else if (str == "CLEAR") {
+                            cout "CLEAR" << '\n';
                             map.clear();
                             map.resize(WINDOW_H / BLOCK_SIZE, std::vector<int>(WINDOW_W / BLOCK_SIZE, 0));
                             tapButton = true;
@@ -107,6 +112,7 @@ void MapEditor::handleEvents() {
                             needUpdateMap = 1;
                             tapButton = true;
                         }
+                        buttons[5].setText(namesTypePaint[paintType]);
                     }
                 }
                 if (!tapButton) {
@@ -208,10 +214,7 @@ void MapEditor::renderWithoutTexture() {
             }
         }
     }
-    buttons[5].setText(namesTypePaint[paintType]);
-    for (auto& but : buttons) {
-        but.render(window);
-    }
+
 
 }
 void MapEditor::render() {
@@ -219,13 +222,17 @@ void MapEditor::render() {
 
     //drawMap();
     renderWithoutTexture();
+    update();
     for (auto& b : buttons) {
         b.render(window);
     }
-    update();
+    
+
+
     window.display();
     //std::cout << "XXXXXXXXXXXXX" << '\n';
 }
 void MapEditor::update() {
     handleEvents();
+    
 }

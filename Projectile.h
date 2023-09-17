@@ -16,7 +16,7 @@ private:
     float positionX = 0;
 
     float positionY=0;
-
+    float timeRender = 0;
     sf::Sprite sprite;
     sf::Texture texture;
     float rotation;
