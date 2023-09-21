@@ -5,12 +5,14 @@
 
 Particles::Particles(int type, float positionXS, float positionYS, float& timeF,std::string newtext="")
 	:typeS(type),timeS(timeF),positionX(positionXS),positionY(positionYS) {
+	setTexture();
+
 
 	sizeVape = rand() % (10 - 5 + 1) + 5;
 	switch (typeS) {
 	case(1):
 		//дым
-		timeLive = 255 / 2;
+		timeLive = 255 / 3;
 		texture.loadFromFile("vape.png");
 		break;
 	case(2):
@@ -27,10 +29,18 @@ Particles::Particles(int type, float positionXS, float positionYS, float& timeF,
 	}
 	randSize = rand() % 3;
 }
-
+void Particles::setTexture() {
+	// Проверка на наличие данных в текстуре
+	if (!Particles::vapeTexture.getSize().x > 0 && !Particles::vapeTexture.getSize().y > 0) {
+		Particles::vapeTexture.loadFromFile("vape.png");
+	}
+	if (!Particles::explosionTexture.getSize().x > 0 && !Particles::explosionTexture.getSize().y > 0) {
+		Particles::explosionTexture.loadFromFile("explosion.png");
+	}
+}
 void Particles::update() {
 	if (typeS !=2) {
-		positionY += 0.1f;
+		positionY += 0.2f;
 	}
 	timeLive -= 1;
 	
@@ -39,37 +49,31 @@ void Particles::update() {
 bool Particles::getStatus() {
 	return needDelete;
 }
-void Particles::draw(sf::RenderWindow& window) {
+void Particles::render(sf::RenderWindow& window) {
 	if (timeLive>10) {
-		
+		sf::Sprite sp;
 		sizeVape += 1.00001;
 		if (typeS == 1) {
 			
-			sprite.setTexture(texture);
-			sprite.setColor(sf::Color(255, 255, 255, timeLive*2));
+				sp.setTexture(Particles::vapeTexture);
+				sp.setColor(sf::Color(255, 255, 255, timeLive * 1.5));
+				sp.setOrigin(sf::Vector2f((sizeVape + randSize) / 2, (sizeVape + randSize) / 2));
+				sp.setScale(sf::Vector2f((sizeVape + randSize) / 20, (sizeVape + randSize) / 20));
+
+				sp.setPosition(sf::Vector2f(positionX * BLOCK_SIZE - 5, positionY * BLOCK_SIZE));
+				window.draw(sp);
 			
-		
-			sprite.setOrigin(sf::Vector2f((sizeVape + randSize) / 2, (sizeVape + randSize) / 2));
-			sprite.setScale(sf::Vector2f((sizeVape + randSize )/20, (sizeVape + randSize) /20));
-
-			sprite.setPosition(sf::Vector2f(positionX * BLOCK_SIZE - 5, positionY * BLOCK_SIZE));
-
-
-			window.draw(sprite);
 		}
 		else if (typeS == 2) {
-			sprite.setTexture(texture);
-			sprite.setColor(sf::Color(255, 255, 255, timeLive*4));
-
-
-
+			sp.setTexture(Particles::explosionTexture);
+			sp.setColor(sf::Color(255, 255, 255, timeLive*4));
 			// Установка масштаба
-			sprite.setScale(sf::Vector2f(5, 5));
+			sp.setScale(sf::Vector2f(5, 5));
 
 			// Рассчитываем позицию с учетом центра спрайта
-			sprite.setPosition(sf::Vector2f(positionX * BLOCK_SIZE - sprite.getGlobalBounds().getSize().x/2, positionY * BLOCK_SIZE-sprite.getGlobalBounds().getSize().y/2));
+			sp.setPosition(sf::Vector2f(positionX * BLOCK_SIZE - sp.getGlobalBounds().getSize().x/2, positionY * BLOCK_SIZE-sp.getGlobalBounds().getSize().y/2));
 
-			window.draw(sprite);
+			window.draw(sp);
 		}
 		else if (typeS == 3) {
 			
@@ -89,4 +93,5 @@ void Particles::draw(sf::RenderWindow& window) {
 
 }
 
-
+sf::Texture vapeTexture;
+sf::Texture explosionTexture;

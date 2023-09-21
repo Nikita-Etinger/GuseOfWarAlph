@@ -4,8 +4,9 @@
 #define cout std::cout<<
 
 const float gravity = 1.5f;
-Player::Player(std::vector<std::vector<int>>& mapS, sf::RenderWindow& windowS, bool com, int newPlayerId, std::string newName, std::vector<Projectile>& projectileS,float& time, std::vector<Particles>& particles)
-    : command(com), map(mapS), window(windowS), playerId(newPlayerId), playerName(newName), projectile(projectileS),timeF(time), particlesF(particles) {
+const float speed = 1.5f;
+Player::Player(std::vector<std::vector<int>>& mapS, sf::RenderWindow& windowS, bool com, int newPlayerId, std::string newName, std::vector<Projectile>& projectileS,float& time, std::vector<Particles>& particles, std::vector<Projectile> projectileBufer)
+    : command(com), map(mapS), window(windowS), playerId(newPlayerId), playerName(newName), projectile(projectileS),projectileBufer(projectileBufer), timeF(time), particlesF(particles) {
 
 
         playerSize = 5;
@@ -64,47 +65,29 @@ bool Player::scanContactProjectile(float radius, sf::Vector2f coordinatePr)
 {
     float distance = std::sqrt(std::pow(coordinatePr.x - posX, 2) + std::pow(coordinatePr.y - posY, 2));
 
-    // Проверяем, долетел ли снаряд до игрока, учитывая коррекцию коллизий
     if (distance <= radius + coorectCollision)
     {
         // Снаряд долетел до игрока, отбрасываем игрока 
-        (posX < coordinatePr.x) ? accelerationX -= distance / 10 : accelerationX += distance / 10;
-        accelerationY -= distance / 10;
-        /*cout "EXPLOSION" << " POWER" << distance / 10 << '\n';*/
+        float accelerationFactor = distance / 10;
+        accelerationX += (posX < coordinatePr.x) ? -accelerationFactor : accelerationFactor;
+        accelerationY -= accelerationFactor;
         hit(radius);
         return true;
     }
-    else
-    {
-        // Снаряд не долетел до игрока
-        return false;
-    }
+    else return false;
 }
 void Player::applyVelocity() {
     bool onGround = false;
     // Проверяем, касается ли игрок земли
     onGround = isOnGround();
     // Сохраняем начальное положение игрока
-    //cout "PlayerX: " << posX << " PlayerY: " << posY << '\n';
     int initialPosX = posX;
     int initialPosY = posY;
-    // очистка поля
-    //for (int i = -coorectCollision; i <= coorectCollision; i++) {
-    //    for (int j = -coorectCollision; j <= coorectCollision; j++) {
-    //        if (posX + i < map[0].size() && posX + i>2 && posY + j < map.size() && posY + j>2) {
-    //            map[posY + i][posX + j] = 0;
-    //        }
-    //    }
-    //}
 
-
-    // Если игрок на земле, сбросить ускорение по Y
     if (onGround) {
         velocityY = 0.0f;
-
     }
     else {
-        
         velocityY += gravity;
     }
 
@@ -118,7 +101,11 @@ void Player::applyVelocity() {
     // Проверяем новую позицию игрока
     bool flagValid = ScanPosition();
     if (!flagValid) {
-        posY--;//уменьшаем posY и снова проверяем
+        posY--;//уменьшаем posY и снова проверяем (тоесть проверка на то что впереди блок в высоту)
+        flagValid = ScanPosition();
+    }
+    if (!flagValid) {
+        posY--;//уменьшаем posY и снова проверяем (тоесть проверка на то что впереди 2блока в высоту)
         flagValid = ScanPosition();
     }
 
@@ -130,10 +117,9 @@ void Player::applyVelocity() {
         // Если не удалось разместить игрока, вернуть его на начальное положение
         posX = initialPosX;
         posY = initialPosY;
-        accelerationX = 0;
-        accelerationY = 0;
-        // Разместить игрока на начальной позиции
-        //PlacePositionOnMap();
+      
+        //velocityX = 0;
+        //velocityY = 0;
     }
     if (accelerationX > 0)accelerationX -= accelerationY / 3 * timeF;
     else if (accelerationX < 0)accelerationX+= accelerationY / 3 * timeF;
@@ -141,8 +127,7 @@ void Player::applyVelocity() {
     if (accelerationY > 0)accelerationY-= accelerationY / 3 * timeF;
     else if (accelerationY < 0)accelerationY += accelerationY/3 * timeF;
     else accelerationY = 0;
-    velocityX = 0;
-    velocityY = 0;
+
 }
 
 bool Player::isOnGround() {
@@ -187,17 +172,17 @@ void Player::drawAim() {
     // Радиус прицела
     float aimRadius = 3.0f; // размер прицела
 
-    // Вычисляем положение прицела относительно центра игрока, учитывая размер блока
+    // положение прицела относительно центра игрока, учитывая размер блока
     float aimX = (posX+playerSize/2) * BLOCK_SIZE + 50.0f * std::cos(directionShot * 3.14159265f / 180.0f); // Расстояние в направлении directionShot
     float aimY = (posY+playerSize / 2)* BLOCK_SIZE + 50.0f * std::sin(directionShot * 3.14159265f / 180.0f);
 
-    // Создаем окружность (прицел) с красной обводкой
+    //  окружность (прицел) с красной обводкой
     sf::CircleShape aimCircle(aimRadius);
-    aimCircle.setFillColor(sf::Color::Transparent); // Задаем цвет заполнения (прозрачный)
-    aimCircle.setOutlineColor(sf::Color::White); // Задаем цвет обводки (красный)
+    aimCircle.setFillColor(sf::Color::Transparent); // цвет заполнения (прозрачный)
+    aimCircle.setOutlineColor(sf::Color::White); //цвет обводки (красный)
     aimCircle.setOutlineThickness(2.0f); // Толщина обводки
 
-    // Устанавливаем положение прицела
+    // положение прицела
     aimCircle.setPosition(aimX - aimRadius  * BLOCK_SIZE / 2,aimY - aimRadius  * BLOCK_SIZE / 2);
 
 
@@ -210,13 +195,13 @@ void Player::drawHpName() {
 
     }
 
-    // Создаем текстовое отображение для имени и здоровья игрока
+    // текстовое отображение для имени и здоровья игрока
     sf::Text playerNameHpText;
     playerNameHpText.setFont(font);
     playerNameHpText.setCharacterSize(10); // Размер шрифта
     playerNameHpText.setFillColor(command ? sf::Color::Red : sf::Color::Blue); // Устанавливаем цвет имени в зависимости от команды
 
-    // Форматируем здоровье с одним знаком после запятой
+    // здоровье с одним знаком после запятой
     std::stringstream hpStream;
     hpStream << std::fixed << std::setprecision(1) << hp;
     std::string hpString = hpStream.str();
@@ -228,13 +213,13 @@ void Player::drawHpName() {
     // Положение текста будет зависеть от позиции игрока и размера шрифта
     playerNameHpText.setPosition(posX * BLOCK_SIZE, (posY - 1) * BLOCK_SIZE - playerNameHpText.getLocalBounds().height - BLOCK_SIZE * 4);
 
-    // Отрисовываем текстовое отображение на окне
+    // текстовое отображение на окне
     window.draw(playerNameHpText);
 }
 void Player::drawPlayer() {
     playerSprite.setTexture(playerTexture);
     float corretSpriteSize = 1.5f;
-    // Установим центр вращения спрайта в его середину
+    // центр вращения спрайта в его середину
     playerSprite.setOrigin(playerSprite.getLocalBounds().width / 2, playerSprite.getLocalBounds().height / 2);
     if (hp > 0) {
         playerSprite.setScale(corretSpriteSize, corretSpriteSize); // Устанавливаем масштаб по обеим осям
@@ -247,7 +232,7 @@ void Player::drawPlayer() {
 
 
     if (!direction) {
-        // Отражаем спрайт по горизонтали (влево)
+        //спрайт по горизонтали (влево)
         playerSprite.setScale(-corretSpriteSize, corretSpriteSize);
     }
     // Иначе спрайт останется в исходном положении (вправо)
@@ -256,20 +241,7 @@ void Player::drawPlayer() {
 }
 
 
-
-//методы в процессе доработки __________________________________________________________________________________________________________________________________________________________________________________________________________________________________________
-// 
-// 
-// 
-// 
-bool Player::getEndTurn() {
-    return turnOff;
-}
-void Player::update(bool turn)
-{
-    //if (timeF > stabilityTimeMax) stabilityTimeMax = timeF;
-    //if (timeF < stabilityTimeMin)stabilityTimeMin = timeF;
-    //stabilityTimeSr = (stabilityTimeMax + stabilityTimeMin) / 2;
+void Player::render(bool turn) {
     if (turn) {
         if (stage == 1) {
             //drawAim();
@@ -279,16 +251,26 @@ void Player::update(bool turn)
     drawHpName();
     drawPlayer();
     //drawCenter();
+
+
+
+}
+
+bool Player::getEndTurn() {
+    return turnOff;
+}
+void Player::update(bool turn)
+{
     applyVelocity();
 }
 void Player::drawPower() {
-    // Создайте задний прямоугольник (черный)
+    //задний прямоугольник (черный)
     sf::RectangleShape backPower;
     backPower.setFillColor(sf::Color::Transparent); // Прозрачный цвет
     backPower.setOutlineColor(sf::Color::Black); // Цвет границы
     backPower.setOutlineThickness(2);
 
-    // Создайте передний прямоугольник (красный)
+    //передний прямоугольник (красный)
     sf::RectangleShape frontPower;
     frontPower.setFillColor(sf::Color::Red);
 
@@ -296,22 +278,22 @@ void Player::drawPower() {
     int powerSize = playerSize * 20/100*powerShot;
     sf::Vector2f size(playerSize*20 , playerSize);
 
-    // Установите размеры и позиции прямоугольников
+    //  размеры и позиции прямоугольников
     backPower.setSize(sf::Vector2f(playerSize * 20, playerSize));
     frontPower.setSize(sf::Vector2f(powerSize, playerSize));
 
-    // Установите центр вращения прямоугольников в левый центральный угол
+    //  центр вращения прямоугольников в левый центральный угол
     backPower.setOrigin(0, size.y / 2);
     frontPower.setOrigin(0, size.y / 2);
 
-     //Вычислите угол в радианах на основе directionShot
+     // угол в радианах на основе directionShot
     float angleRad = directionShot * 3.14159265f / 180.0f;
 
-    // Установите поворот прямоугольников на вычисленный угол
+    //  поворот прямоугольников на вычисленный угол
     backPower.setRotation(angleRad * 180.0f / 3.14159265f);
     frontPower.setRotation(angleRad * 180.0f / 3.14159265f);
 
-     //Установите позиции прямоугольников над игроком
+     // позиции прямоугольников над игроком
     sf::Vector2f playerPosition = vt(posX * BLOCK_SIZE, posY * BLOCK_SIZE );
     backPower.setPosition(playerPosition.x, playerPosition.y - playerSize*5);
     frontPower.setPosition(playerPosition.x, playerPosition.y - playerSize * 5);
@@ -325,10 +307,6 @@ void Player::drawPower() {
 void Player::drawCenter() {
     // Радиус прицела
     float aimRadius = 3.0f; // Замените это значение на желаемый размер прицела
-
-    //// Вычисляем положение прицела относительно центра игрока, учитывая размер блока
-    //float aimX = posX * BLOCK_SIZE + 60.0f * std::cos(directionShot * 3.14159265f / 180.0f); // Расстояние 10f в направлении directionShot
-    //float aimY = posY * BLOCK_SIZE + 60.0f * std::sin(directionShot * 3.14159265f / 180.0f);
 
     // Создаем окружность (прицел) с красной обводкой
     sf::CircleShape aimCircle(aimRadius);
@@ -376,14 +354,14 @@ void Player::handlerEvent(sf::Event& event) {
                 ////////////////////////////////////////////////////////////////////
 
                // Вычислите компоненты velocityX и velocityY на основе угла
-                float projectileSpeed = outputValue; 
+                float projectileSpeed = outputValue;
                 float velocityXPr = projectileSpeed * std::cos(angleRad);
                 float velocityYPr = projectileSpeed * std::sin(angleRad);
 
 
 
                 // Создайте снаряд с вычисленными компонентами
-                projectile.push_back(Projectile(posX, posY-playerSize, velocityXPr, velocityYPr, 0.2f, timeF, particlesF));
+                projectile.push_back(Projectile(posX, posY-playerSize, velocityXPr, velocityYPr, outputValue*10, timeF, particlesF));
                 return;
             }
              
@@ -438,7 +416,7 @@ void Player::hit(float hitCount) {
     if (hitCount != 0.0f) {
         std::stringstream hpStream;
         hpStream << std::fixed << std::setprecision(1) << hitCount / 2;
-        std::string hpString = hpStream.str();
+        std::string hpString = "-"+hpStream.str();
         particlesF.push_back(Particles(3, posX, posY , timeF, hpString));
         hp -= hitCount / 2;
     }

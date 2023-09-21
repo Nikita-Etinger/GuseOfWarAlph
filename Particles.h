@@ -3,13 +3,15 @@
 #include <vector>
 #include <SFML/Graphics.hpp>
 #include <iostream>
+
 class Particles
 {
 private:
+
     float& timeS;
     float timeLeft = 0;
 
-    bool needDelete=false;
+    bool needDelete = false;
     float positionX = 0;
     float positionY = 0;
 
@@ -25,15 +27,19 @@ private:
     int randSize;
 
 public:
+    static sf::Texture vapeTexture;
+    static sf::Texture explosionTexture;
 
-    Particles(int type,float positionXS, float positionYS, float& time, std::string newtext);
+    Particles(int type, float positionXS, float positionYS, float& time, std::string newtext);
+
+
     void update();
-    void draw(sf::RenderWindow& window);
+    void render(sf::RenderWindow& window);
     bool getStatus();
-    bool operator==(Particles& other);
 
     bool operator!=(Particles& other);
 
+    void setTexture();
     Particles& operator=(const Particles& other) {
         if (this != &other) {  // Проверка на самоприсваивание
             // Копируйте значения всех членов класса
@@ -53,3 +59,4 @@ public:
         return *this;  // Вернуть *this для поддержки цепочки присваиваний
     }
 };
+

@@ -1,4 +1,4 @@
-#include "Map.h"
+п»ї#include "Map.h"
 
 
 Map::Map(sf::RenderWindow& windowS) :window(windowS),needClose(false)
@@ -31,7 +31,7 @@ void Map::loadMapFromFile()
         inFile.close();
     }
     else {
-        // Обработка ошибки открытия файла
+        // РћР±СЂР°Р±РѕС‚РєР° РѕС€РёР±РєРё РѕС‚РєСЂС‹С‚РёСЏ С„Р°Р№Р»Р°
     }
 }
 void Map::updateMapTexture()
@@ -74,7 +74,7 @@ void Map::updateMapTexture()
             }
         }
     }
-    mapTexture.clear(sf::Color::Transparent); // Очищаем текстуру
+    mapTexture.clear(sf::Color::Transparent); // РћС‡РёС‰Р°РµРј С‚РµРєСЃС‚СѓСЂСѓ
 
     
     for (int x = 0; x < map.size(); ++x) {
@@ -84,139 +84,129 @@ void Map::updateMapTexture()
                 sf::RectangleShape block(sf::Vector2f(BLOCK_SIZE, BLOCK_SIZE));
                 block.setPosition(y * BLOCK_SIZE, (map.size() - x - 1) * BLOCK_SIZE);
 
-                // Вычисляем количество блоков над текущим блоком
+                // Р’С‹С‡РёСЃР»СЏРµРј РєРѕР»РёС‡РµСЃС‚РІРѕ Р±Р»РѕРєРѕРІ РЅР°Рґ С‚РµРєСѓС‰РёРј Р±Р»РѕРєРѕРј
                 int blocksAbove = 0;
                 for (int i = x - 1; i >= 0; --i) {
                     if (map[i][y] > 0 && map[i][y] <= 2) {
                         ++blocksAbove;
                     }
                     else {
-                        break; // Прекращаем подсчет, если встречаем другой тип блока
+                        break; // РџСЂРµРєСЂР°С‰Р°РµРј РїРѕРґСЃС‡РµС‚, РµСЃР»Рё РІСЃС‚СЂРµС‡Р°РµРј РґСЂСѓРіРѕР№ С‚РёРї Р±Р»РѕРєР°
                     }
                 }
 
-                // Вычисляем количество блоков под текущим блоком
+                // Р’С‹С‡РёСЃР»СЏРµРј РєРѕР»РёС‡РµСЃС‚РІРѕ Р±Р»РѕРєРѕРІ РїРѕРґ С‚РµРєСѓС‰РёРј Р±Р»РѕРєРѕРј
                 int blocksBelow = 99;
 
 
                 int r, g, b;
                 int colorReduction;
 
-                    colorReduction = std::min(blocksAbove, blocksBelow) * 15; // Примерный коэффициент для уменьшения цвета
+                    colorReduction = std::min(blocksAbove, blocksBelow) * 15; // РџСЂРёРјРµСЂРЅС‹Р№ РєРѕСЌС„С„РёС†РёРµРЅС‚ РґР»СЏ СѓРјРµРЅСЊС€РµРЅРёСЏ С†РІРµС‚Р°
 
                 if (value == 1) {
-                    r = std::max(0, 189 - colorReduction); // Минимальное значение R - 0
-                    g = std::max(0, 183 - colorReduction); // Минимальное значение G - 0
-                    b = std::max(0, 107 - colorReduction); // Минимальное значение B - 0
+                    r = std::max(0, 189 - colorReduction); // РњРёРЅРёРјР°Р»СЊРЅРѕРµ Р·РЅР°С‡РµРЅРёРµ R - 0
+                    g = std::max(0, 183 - colorReduction); // РњРёРЅРёРјР°Р»СЊРЅРѕРµ Р·РЅР°С‡РµРЅРёРµ G - 0
+                    b = std::max(0, 107 - colorReduction); // РњРёРЅРёРјР°Р»СЊРЅРѕРµ Р·РЅР°С‡РµРЅРёРµ B - 0
                 }
                 else {
-                    r = std::max(0, 34 - colorReduction); // Минимальное значение R - 0
-                    g = std::max(0, 139 - colorReduction); // Минимальное значение G - 0
-                    b = std::max(0, 34 - colorReduction); // Минимальное значение B - 0
+                    r = std::max(0, 34 - colorReduction); // РњРёРЅРёРјР°Р»СЊРЅРѕРµ Р·РЅР°С‡РµРЅРёРµ R - 0
+                    g = std::max(0, 139 - colorReduction); // РњРёРЅРёРјР°Р»СЊРЅРѕРµ Р·РЅР°С‡РµРЅРёРµ G - 0
+                    b = std::max(0, 34 - colorReduction); // РњРёРЅРёРјР°Р»СЊРЅРѕРµ Р·РЅР°С‡РµРЅРёРµ B - 0
                 }
 
                 block.setFillColor(sf::Color(r, g, b));
-                mapTexture.draw(block); // Рисуем блоки на текстуре
+                mapTexture.draw(block); // Р РёСЃСѓРµРј Р±Р»РѕРєРё РЅР° С‚РµРєСЃС‚СѓСЂРµ
             }
         }
     }
-    mapSprite.setTexture(mapTexture.getTexture()); // Устанавливаем текстуру из буфера на спрайт
+    mapSprite.setTexture(mapTexture.getTexture()); // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј С‚РµРєСЃС‚СѓСЂСѓ РёР· Р±СѓС„РµСЂР° РЅР° СЃРїСЂР°Р№С‚
 }
 
 
 void Map::applyPhysics() {
     while (!map.empty()) {
         {
-            std::lock_guard<std::mutex> lock(mutex);
-            /*std::cout << "thread no close " << '\n';*/
-            if (needClose) {
-                std::cout << "thread close " << '\n';
-                break;
-            }
+            
         }
-        
-        if (mapBuf != map) {
 
+        if (mapBuf != map) {
+            /*std::cout << "map has bee update " << '\n';*/
 
 
             mapBuf = map;
             bool hasBlocksReachedBottom = false;
-
-            for (int x = map.size() - 1; x > 0; --x) {
-                for (int y = 0; y < map[x].size(); ++y) {
-                    if (map[x][y] == 2) {
-
-                    }
-                    else if (map[x][y] > 0 && x < map.size() - 1 && map[x + 1][y] == 0) {
-                        map[x + 1][y] = map[x][y];
-                        map[x][y] = 0;
-                        hasBlocksReachedBottom = true;
-                    }
-                }
-            }
-
-            if (/*hasBlocksReachedBottom*/1) {
+            {
+                std::lock_guard<std::mutex> lock(mutex);
                 for (int x = map.size() - 1; x > 0; --x) {
                     for (int y = 0; y < map[x].size(); ++y) {
                         if (map[x][y] == 2) {
 
                         }
-                        else if (map[x][y] > 0 && x < map.size() - 1) {
-                            if (y > 0 && map[x + 1][y] > 0 && map[x + 1][y - 1] == 0) {
-                                map[x + 1][y - 1] = map[x][y];
-                                map[x][y] = 0;
+                        else if (map[x][y] > 0 && x < map.size() - 1 && map[x + 1][y] == 0) {
+                            map[x + 1][y] = map[x][y];
+                            map[x][y] = 0;
+                            hasBlocksReachedBottom = true;
+                        }
+                    }
+                }
+
+                if (/*hasBlocksReachedBottom*/1) {
+                    for (int x = map.size() - 1; x > 0; --x) {
+                        for (int y = 0; y < map[x].size(); ++y) {
+                            if (map[x][y] == 2) {
+
                             }
-                            else if (y < map[x].size() - 1 && map[x + 1][y] > 0 && map[x + 1][y + 1] == 0) {
-                                map[x + 1][y + 1] = map[x][y];
-                                map[x][y] = 0;
-                            }
-                            else if (map[x + 1][y] == 0) {
-                                map[x + 1][y] = map[x][y];
-                                map[x][y] = 0;
+                            else if (map[x][y] > 0 && x < map.size() - 1) {
+                                if (y > 0 && map[x + 1][y] > 0 && map[x + 1][y - 1] == 0) {
+                                    map[x + 1][y - 1] = map[x][y];
+                                    map[x][y] = 0;
+                                }
+                                else if (y < map[x].size() - 1 && map[x + 1][y] > 0 && map[x + 1][y + 1] == 0) {
+                                    map[x + 1][y + 1] = map[x][y];
+                                    map[x][y] = 0;
+                                }
+                                else if (map[x + 1][y] == 0) {
+                                    map[x + 1][y] = map[x][y];
+                                    map[x][y] = 0;
+                                }
                             }
                         }
                     }
                 }
             }
 
-            if (mapBuf == map) {//проверка на отличие 
+            if (mapBuf == map) {
                 needUpdateMap = 0;
                 std::cout << "MapTexture UpdateComlite" << "\n";
             }
-
+            else {
+                /*updateMapTexture();*/
+            }
             mapUpdateComlite = 1;
         }
 
         //std::cout << "thread2 is open "<<"need Close: "<<needClose << '\n';
 
     }
-    
-    if (!map.empty()) {
-        map.clear();
-        
-    }
-    
-        
 }
 
 void Map::drawMap() {
+
+
         window.draw(backGroundSprite);
-        if (1/*mapBuf != map*/) {
+        {
+            std::lock_guard<std::mutex> lock(mutex);
             updateMapTexture();
+            window.draw(mapSprite);
         }
-        window.draw(mapSprite);
 
 }
 void Map::explosion(vt coordinate, float radius) {
     for (int x = 0; x < map.size(); ++x) {
         for (int y = 0; y < map[0].size(); ++y) {
-            // Рассчитываем расстояние от текущей точки до эпицентра взрыва
             float distance = std::sqrt((x - coordinate.x) * (x - coordinate.x) + (y - coordinate.y) * (y - coordinate.y));
-
-            // Проверяем, находится ли точка внутри радиуса взрыва
             if (distance <= radius) {
-
-                //устанавливаем значение в матрице map[x][y] равным 0
                 map[x][y] = 0;
             }
         }

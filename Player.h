@@ -56,6 +56,7 @@ private:
 	void drawPlayer();
 	float correctAimX = 0;
 	std::vector<Projectile>& projectile;
+	std::vector<Projectile>& projectileBufer;
 	void drawCenter();
 	void PlacePositionOnMap();
 	bool ScanPosition();
@@ -65,7 +66,7 @@ public:
 
 	bool scanContactProjectile(float radius, vt coordinatePr);
 
-	Player(std::vector<std::vector<int>>& mapS, sf::RenderWindow& windowS, bool com, int newPlayerId, std::string newName, std::vector<Projectile>& projectileS,float& time , std::vector<Particles>& particles);
+	Player(std::vector<std::vector<int>>& mapS, sf::RenderWindow& windowS, bool com, int newPlayerId, std::string newName, std::vector<Projectile>& projectileS,float& time , std::vector<Particles>& particles, std::vector<Projectile> projectileBufer);
 	~Player();
 	void update(bool turn);
 	void handlerEvent(sf::Event& event);
@@ -76,6 +77,7 @@ public:
 	void hit(float radius);
 	void resetStage();
 	bool getEndTurn();
+	void render(bool turn);
 
 };
 

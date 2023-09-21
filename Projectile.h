@@ -6,7 +6,6 @@
 class Projectile
 {
 private:
-    float& timeF;
     bool explosion=0;
     float velocityX;
     float velocityY;
@@ -22,20 +21,47 @@ private:
     float rotation;
     std::vector<Particles>& particlesF;
     float timeLeft = 0;
+    float& timeF;
 public:
+
+    Projectile(const Projectile& other);
     bool isActive();
     Projectile(float positionX, float positionY, float velocityXS, float velocityYS, float speed,float& time, std::vector<Particles>& particles);
     void applyVelocity();
     void update();
-    bool getStatus();
+    bool isExplosion();
     vt getCoordinate();
     float getRadius();
     int getSize();
     void explosions();
-    void draw(sf::RenderWindow& window);
-    bool operator==(Projectile& other);
-    bool operator!=(Projectile& other);
+    void render(sf::RenderWindow& window);
     void outOfMap();
-    //копирование только ссылки
-    //void operator=(Projectile& other);
+    bool operator==(const Projectile& other) const {
+        return this == &other;
+    }
+    Projectile& operator=(const Projectile& other)
+    {
+        if (this == &other) // Проверка на самоприсваивание
+            return *this;
+
+        // Копируем данные из other в текущий объект
+        explosion = other.explosion;
+        velocityX = other.velocityX;
+        velocityY = other.velocityY;
+        speed = other.speed;
+        radius = other.radius;
+        size = other.size;
+        positionX = other.positionX;
+        positionY = other.positionY;
+        timeRender = other.timeRender;
+        sprite = other.sprite;
+        texture = other.texture;
+        rotation = other.rotation;
+        particlesF = other.particlesF;
+        timeLeft = other.timeLeft;
+        timeF = other.timeF;
+
+       
+        return *this;
+    }
 };

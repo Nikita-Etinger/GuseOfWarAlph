@@ -22,6 +22,7 @@ protected:
     sf::RenderWindow& window;
     std::vector<std::vector<int>> map;
     std::vector<std::vector<int>> mapBuf;
+    sf::Clock clock;
     
     std::vector<Button> buttons;
     bool needUpdateMap=false;
@@ -41,14 +42,11 @@ protected:
     //реализация в map
     virtual void applyPhysics();
     virtual void loadMapFromFile(); // Общая реализация для загрузки карты
-
     virtual void drawMap();
-
     virtual void updateMapTexture();
-
     //реализация у наследников
     virtual void update() = 0;
-    //virtual void render() = 0;
+    virtual void render() = 0;
     virtual void handleEvents() = 0;
 
     
