@@ -35,7 +35,11 @@ void Projectile::update() {
 
             //std::cout << "Time: " << timeLeft << "\n";
             bool flag = rand() % (1 + 1);
-            if (flag)particlesF.push_back(Particles(1, positionX, positionY, timeF, ""));
+            if (flag) {
+
+                particlesF.push_back(Particles(1, positionX, positionY, timeF, ""));
+
+            }
                 // ќбновл€ем позицию снар€да на основе скорости
             positionX += velocityX * speed / 100 * timeF / 100;
             positionY += velocityY * speed / 100 * timeF / 100;

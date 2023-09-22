@@ -15,6 +15,7 @@ bool LandScape::getNeedClose() {
 }
 void LandScape::run()
 {
+    font.loadFromFile("font.ttf");
 
     {
         std::lock_guard<std::mutex> lock(mutex);
@@ -77,7 +78,7 @@ void LandScape::run()
             break;
         }
 
-
+        
         time = clock.getElapsedTime().asMicroseconds();
         clock.restart();
         time = time / 800;
@@ -95,7 +96,19 @@ void LandScape::update() {
     handleEvents();
     //scanCollisionProjectile();
 
-
+    timeSecond += time;
+    if (timeSecond >=1000) {
+        timeLeft--;
+        if (timeLeft <=0) {
+            indexPlayer++;
+            if (indexPlayer >= players.size() - 1) {
+                indexPlayer = 0;
+            }
+            timeLeft = 60;
+        }
+        timeSecond = 0;
+        
+    }
     if (!needClose) {
         for (int i = 0; i < players.size(); i++) {
             if (i == indexPlayer) {
@@ -120,10 +133,12 @@ void LandScape::ParticlesCleaner() {
         //    bool flag = rand() % (1 + 1);
         //    if (flag)particlesF.push_back(Particles(1, projectile[0].getCoordinate().x, projectile[0].getCoordinate().y, time, ""));
         //}
-        if (particlesF.size()>2 && particlesF[1].getStatus()) {
-            //particlesF.erase(particlesF.begin()+1);
-            particlesF.clear();
-            if (particlesF.empty()) std::cout << "Particles clear" << std::endl;
+        if (projectile.empty()) {
+            if (particlesF.size() > 2 && particlesF[1].getStatus()) {
+                //particlesF.erase(particlesF.begin()+1);
+                particlesF.clear();
+                if (particlesF.empty()) std::cout << "Particles clear" << std::endl;
+            }
         }
         std::cout << "Particles size: " << particlesF.size() << '\n';
         
@@ -135,14 +150,21 @@ void LandScape::render()
     drawMap();
     for (auto& but : buttons) but.render(window);
     {
-        std::lock_guard<std::mutex> lock(mutex);
-        for (auto& pr : projectile) pr.render(window);
-
+        //std::lock_guard<std::mutex> lock(mutex);
+        if (!projectile.empty()) {
+            projectile[0].render(window);
+        }
         for (auto& par : particlesF) if (!par.getStatus())par.render(window);
         for (int i = 0; i < players.size(); i++) {
             players[i].render((i == indexPlayer) ? 1 : 0);
         }
     }
+    timeLeftText.setString(std::to_string(timeLeft));
+    timeLeftText.setPosition(sf::Vector2f(WINDOW_W/2, 10));
+    timeLeftText.setFont(font);
+    timeLeftText.setCharacterSize(50);
+    timeLeftText.setFillColor(sf::Color::Red);
+    window.draw(timeLeftText);
     window.display();
 
 }

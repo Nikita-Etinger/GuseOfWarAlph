@@ -16,6 +16,10 @@ public:
 
     bool getNeedClose();
 private:
+    sf::Text timeLeftText;
+    sf::Font font;
+    int timeLeft = 10;
+    float timeSecond = 0;
     std::vector<Particles> particlesF;
     std::vector<Projectile> projectile;
     std::vector<Player> players;
