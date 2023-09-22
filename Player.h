@@ -78,6 +78,7 @@ public:
 	void resetStage();
 	bool getEndTurn();
 	void render(bool turn);
+	bool isLive();
 
 };
 

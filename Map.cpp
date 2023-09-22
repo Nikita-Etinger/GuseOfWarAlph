@@ -36,44 +36,44 @@ void Map::loadMapFromFile()
 }
 void Map::updateMapTexture()
 {
-    bool hasBlocksReachedBottom = false;
+    //bool hasBlocksReachedBottom = false;
 
-    for (int x = map.size() - 1; x > 0; --x) {
-        for (int y = 0; y < map[x].size(); ++y) {
-            if (map[x][y] == 2) {
+    //for (int x = map.size() - 1; x > 0; --x) {
+    //    for (int y = 0; y < map[x].size(); ++y) {
+    //        if (map[x][y] == 2) {
 
-            }
-            else if (map[x][y] > 0 && x < map.size() - 1 && map[x + 1][y] == 0) {
-                map[x + 1][y] = map[x][y];
-                map[x][y] = 0;
-                hasBlocksReachedBottom = true;
-            }
-        }
-    }
+    //        }
+    //        else if (map[x][y] > 0 && x < map.size() - 1 && map[x + 1][y] == 0) {
+    //            map[x + 1][y] = map[x][y];
+    //            map[x][y] = 0;
+    //            hasBlocksReachedBottom = true;
+    //        }
+    //    }
+    //}
 
-    if (hasBlocksReachedBottom) {
-        for (int x = map.size() - 1; x > 0; --x) {
-            for (int y = 0; y < map[x].size(); ++y) {
-                if (map[x][y] == 2) {
+    //if (hasBlocksReachedBottom) {
+    //    for (int x = map.size() - 1; x > 0; --x) {
+    //        for (int y = 0; y < map[x].size(); ++y) {
+    //            if (map[x][y] == 2) {
 
-                }
-                else if (map[x][y] > 0 && x < map.size() - 1) {
-                    if (y > 0 && map[x + 1][y] > 0 && map[x + 1][y - 1] == 0) {
-                        map[x + 1][y - 1] = map[x][y];
-                        map[x][y] = 0;
-                    }
-                    else if (y < map[x].size() - 1 && map[x + 1][y] > 0 && map[x + 1][y + 1] == 0) {
-                        map[x + 1][y + 1] = map[x][y];
-                        map[x][y] = 0;
-                    }
-                    else if (map[x + 1][y] == 0) {
-                        map[x + 1][y] = map[x][y];
-                        map[x][y] = 0;
-                    }
-                }
-            }
-        }
-    }
+    //            }
+    //            else if (map[x][y] > 0 && x < map.size() - 1) {
+    //                if (y > 0 && map[x + 1][y] > 0 && map[x + 1][y - 1] == 0) {
+    //                    map[x + 1][y - 1] = map[x][y];
+    //                    map[x][y] = 0;
+    //                }
+    //                else if (y < map[x].size() - 1 && map[x + 1][y] > 0 && map[x + 1][y + 1] == 0) {
+    //                    map[x + 1][y + 1] = map[x][y];
+    //                    map[x][y] = 0;
+    //                }
+    //                else if (map[x + 1][y] == 0) {
+    //                    map[x + 1][y] = map[x][y];
+    //                    map[x][y] = 0;
+    //                }
+    //            }
+    //        }
+    //    }
+    //}
     mapTexture.clear(sf::Color::Transparent); // Очищаем текстуру
 
     
@@ -120,6 +120,7 @@ void Map::updateMapTexture()
             }
         }
     }
+    std::lock_guard<std::mutex> lock(mutex);
     mapSprite.setTexture(mapTexture.getTexture()); // Устанавливаем текстуру из буфера на спрайт
 }
 
@@ -196,7 +197,7 @@ void Map::drawMap() {
 
         window.draw(backGroundSprite);
         {
-            std::lock_guard<std::mutex> lock(mutex);
+            //std::lock_guard<std::mutex> lock(mutex);
             updateMapTexture();
             window.draw(mapSprite);
         }

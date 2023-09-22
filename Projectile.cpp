@@ -1,10 +1,19 @@
 #include "Projectile.h"
 
 
-const float gravity = 0.001f; //дл€ замедлени€ полета
 
-Projectile::Projectile(float positionX, float positionY, float velocityXS, float velocityYS, float speed, float& time, std::vector<Particles>& particles)
-    : positionX(positionX), positionY(positionY), velocityX(velocityXS), velocityY(velocityYS), speed(speed), timeF(time), particlesF(particles) {
+const float gravity = 0.0001f; //дл€ замедлени€ полета
+
+Projectile::Projectile(float positionX, float positionY, float velocityXS, float velocityYS, float speed, float& time,
+    std::vector<Particles>& particles,
+
+    std::vector<std::vector<int>>& maps):
+    positionX(positionX), positionY(positionY),
+    velocityX(velocityXS), velocityY(velocityYS),
+    speed(speed), timeF(time),
+        particlesF(particles),
+        map(maps) 
+{
     //std::cout << "Create projectile" << std::endl;
     texture.loadFromFile("projectile.png");
     std::cout << "projectile create" << '\n';
@@ -23,35 +32,37 @@ void Projectile::applyVelocity() {
 }
 
 void Projectile::update() {
+    //time = clock.getElapsedTime().asMicroseconds();
+    //clock.restart();
+    //time = time / 2000;
+    std::cout << timeF << '\n';
     if (!explosion) {
-        timeLeft += timeF;
-        timeRender += timeF;//сколько времени прошло с последнего обновлени€ 
-        timeLeft += timeF;//сколько времени прошло
-        //std::cout << "Time: " << timeF << '\n';
-        //std::cout << "Time Render: " << timeRender << '\n';
-        //std::cout << "TimeLeft: " << timeLeft / timeRender << '\n';
-        if (timeRender>100000) {
+        // ќбновл€ем позицию снар€да на основе скорости
+        positionX += velocityX * speed / 1000*timeF/ 8;
+        positionY += velocityY * speed / 1000*timeF/ 8;
+
+        // ќбновл€ем вертикальную скорость с учетом гравитации
+        velocityY += gravity * timeF/8;
+        bool flag = rand() % (1 + 1);
+        if (1) {
+
+            particlesF.push_back(Particles(1, positionX, positionY, timeF, ""));
+
+        }
+        // ”станавливаем угол поворота спрайта
+        rotation = std::atan2(velocityY, velocityX) * 180 / 3.14159265f;
 
 
-            //std::cout << "Time: " << timeLeft << "\n";
-            bool flag = rand() % (1 + 1);
-            if (flag) {
-
-                particlesF.push_back(Particles(1, positionX, positionY, timeF, ""));
-
+        if (positionX >= 2 && positionX < map[0].size() - 2 && positionY >= 2 && positionY < map.size() - 2) {
+            if (map[positionY][positionX] > 0) {
+                explosions();
             }
-                // ќбновл€ем позицию снар€да на основе скорости
-            positionX += velocityX * speed / 100 * timeF / 100;
-            positionY += velocityY * speed / 100 * timeF / 100;
-            
-
-            rotation = std::atan2(velocityY, velocityX) * 180 / 3.14159265f;
-            // ќбновл€ем вертикальную скорость с учетом гравитации
-            velocityY += gravity;
-
-            timeRender = 0;
+        }
+        else {
+            explosion = 1;
         }
     }
+
 }
 void Projectile::outOfMap() {
     explosion = 1;
@@ -70,7 +81,7 @@ void Projectile::render(sf::RenderWindow& window) {
 }
 void Projectile::explosions() {
     
-    //particlesF.push_back(Particles(2, positionX, positionY, timeF, ""));
+    particlesF.push_back(Particles(2, positionX, positionY, timeF, ""));
     //for (int i = 0; i < 10; i++) {
     //    int x = rand() % (10 - (-10) + 1) + (-10);
     //    int y = rand() % (10 - (-10) + 1) + (-10);
@@ -118,11 +129,6 @@ Projectile::Projectile(const Projectile& other)
     rotation(other.rotation),
     particlesF(other.particlesF),
     timeLeft(other.timeLeft),
-    timeF(other.timeF)
-{
-    // ≈сли вектор particlesF содержит указатели или ссылки на объекты,
-    // то нужно убедитьс€, что они правильно копируютс€ или перенос€тс€.
-    // ≈сли это объекты класса Particles, убедитесь, что класс Particles имеет
-    // корректно определенный оператор копировани€ или перемещени€.
-}
-
+    timeF(other.timeF),
+    map(other.map)
+{}

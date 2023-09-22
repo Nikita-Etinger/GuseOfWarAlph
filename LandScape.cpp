@@ -29,11 +29,11 @@ void LandScape::run()
 
         ParticlesCleaner();
         });
-    std::thread myThreadProjectileCollision([this]() {
-        
-        scanCollisionProjectile();
-     });
-    
+    //std::thread myThreadUpdateProjectile([this]() {
+    //    
+    //    updateProjectile();
+    // });
+    //
     buttons.push_back(Button(sf::Vector2f(BUTTON_SIZE, BUTTON_SIZE / 2),
         sf::Vector2f(BUTTON_SIZE * 0, 0),
         sf::Color(130, 78, 100, 255),
@@ -69,7 +69,7 @@ void LandScape::run()
             }
             myThreadParticlesCleaner.join();
             myThreadPhysics.join();
-            myThreadProjectileCollision.join();
+            //myThreadUpdateProjectile.join();
 
             
 
@@ -94,13 +94,13 @@ void LandScape::run()
 
 void LandScape::update() {
     handleEvents();
-    //scanCollisionProjectile();
 
     timeSecond += time;
     if (timeSecond >=1000) {
         timeLeft--;
         if (timeLeft <=0) {
             indexPlayer++;
+            if(!players[indexPlayer].isLive())indexPlayer++;
             if (indexPlayer >= players.size() - 1) {
                 indexPlayer = 0;
             }
@@ -116,6 +116,7 @@ void LandScape::update() {
                 if (players[i].getEndTurn()) {
                     players[i].resetStage();
                     indexPlayer++;
+                    if (!players[indexPlayer].isLive())indexPlayer++;
                     if (indexPlayer >= players.size() - 1) {
                         indexPlayer = 0;
                     }
@@ -125,22 +126,36 @@ void LandScape::update() {
         }
         for (auto& par : particlesF) if (!par.getStatus()) par.update();
     }
+    if (!projectileBufer.empty()) {
+        Projectile prBuf = projectileBufer[0];
+        projectile.push_back(prBuf);
+        projectileBufer.clear();
+    }
+    if (!projectile.empty()){
+        if (projectile[0].isExplosion()) {
+            for (auto& pl : players) {
+                pl.scanContactProjectile(projectile[0].getRadius(), projectile[0].getCoordinate());
+            }
+            explosion(sf::Vector2f(projectile[0].getCoordinate().y, projectile[0].getCoordinate().x), projectile[0].getRadius());
+            projectile.clear();
+        }
+        else {
+            projectile[0].update();
+        }
+    }
 
 }
 void LandScape::ParticlesCleaner() {
     while (!needClose) {
-        //if (!projectile.empty()) {
-        //    bool flag = rand() % (1 + 1);
-        //    if (flag)particlesF.push_back(Particles(1, projectile[0].getCoordinate().x, projectile[0].getCoordinate().y, time, ""));
-        //}
         if (projectile.empty()) {
-            if (particlesF.size() > 2 && particlesF[1].getStatus()) {
+            
+            if (particlesF.size() > 2 &&particlesF[particlesF.size()-1].getStatus()) {
                 //particlesF.erase(particlesF.begin()+1);
                 particlesF.clear();
                 if (particlesF.empty()) std::cout << "Particles clear" << std::endl;
             }
         }
-        std::cout << "Particles size: " << particlesF.size() << '\n';
+        //std::cout << "Particles size: " << particlesF.size() << '\n';
         
     }
 }
@@ -204,69 +219,19 @@ void LandScape::handleEvents()
             // Создаем снаряд
             {
                 std::lock_guard<std::mutex> lock(mutex);
-                //particlesF.push_back(Particles(1, mapX, mapY, time, ""));
                 if(projectile.empty())
-                projectileBufer.push_back(Projectile(mapX, mapY, 0.1f, -0.1f, 1000, time, particlesF));
+                projectileBufer.push_back(Projectile(mapX, mapY, 0.1f, -0.1f, 1000, time, particlesF,map));
             }
-
         }
-        
-
     }
     
 }
 
 //поток обработки контакта 
-void LandScape::scanCollisionProjectile() {
+void LandScape::updateProjectile() {
     while (!needClose) {
-        if (!projectileBufer.empty()) {
-            Projectile prBuf = projectileBufer[0];
-            projectile.push_back(prBuf);
-            projectileBufer.clear();
-        }
-        if (!projectile.empty()) {
-            Projectile& pr = projectile[0];
-
-            //if (!pr.isExplosion()) {
-            vt positionPr = pr.getCoordinate();
-            int sizePr = pr.getSize();
-            float radiusPr = pr.getRadius();
-            bool exp = false;
-
-            for (auto& pl : players) {
-                if (pl.scanContactProjectile(radiusPr, positionPr)) {
-                    exp = true;
-                    pr.explosions();
-                }
-            }
-
-            if (!exp) {
-                if (positionPr.x >= 1 && positionPr.x < map[0].size() - 1 && positionPr.y >= 1 && positionPr.y < map.size() - 1) {
-                    if (map[positionPr.y][positionPr.x] > 0) {
-                        pr.explosions();
-                        exp = true;
-                        {
-                            std::lock_guard<std::mutex> lock(mutex);
-                            explosion(vt(positionPr.y, positionPr.x), radiusPr);
-                        }
-                    }
-                }
-                else {
-                    pr.outOfMap();
-                    exp = true;
-                }
-            }
-
-            if (!exp) {
-                //std::lock_guard<std::mutex> lock(mutex);
-                pr.update();
-
-            }
-            else {
-                std::lock_guard<std::mutex> lock(mutex);
-                projectile.erase(projectile.begin());
-            }
-        }
+        /*if(!projectile.empty())
+        projectile[0].update();*/
     }
 
 }

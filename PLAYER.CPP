@@ -361,7 +361,7 @@ void Player::handlerEvent(sf::Event& event) {
 
 
                 // Создайте снаряд с вычисленными компонентами
-                projectile.push_back(Projectile(posX, posY-playerSize, velocityXPr, velocityYPr, outputValue*10, timeF, particlesF));
+                projectile.push_back(Projectile(posX, posY-playerSize, velocityXPr, velocityYPr, outputValue*10, timeF, particlesF,map));
                 return;
             }
              
@@ -420,5 +420,8 @@ void Player::hit(float hitCount) {
         particlesF.push_back(Particles(3, posX, posY , timeF, hpString));
         hp -= hitCount / 2;
     }
+}
+bool Player::isLive() {
+    return(hp > 0) ? 1 : 0;
 }
 

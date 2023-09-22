@@ -23,7 +23,7 @@ protected:
     std::vector<std::vector<int>> map;
     std::vector<std::vector<int>> mapBuf;
     sf::Clock clock;
-    
+    float time = 0;
     std::vector<Button> buttons;
     bool needUpdateMap=false;
     sf::Color colors[9]{ sf::Color::Color(255, 250, 205),
@@ -37,7 +37,7 @@ protected:
         sf::Color(0, 255, 255)   // Ярко-голубой цвет 
     };
     bool flagUpdate = false;
-    float time = 0;
+    
 
     //реализация в map
     virtual void applyPhysics();

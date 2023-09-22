@@ -31,7 +31,7 @@ private:
     int mousePosX;
     int mousePosY;
     bool flagUpdate = 1;
-    void scanCollisionProjectile();
+    void updateProjectile();
     void ParticlesCleaner();
 
     bool needClose = 0;
