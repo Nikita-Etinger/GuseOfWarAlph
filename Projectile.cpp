@@ -2,52 +2,56 @@
 
 
 
-const float gravity = 0.0001f; //дл€ замедлени€ полета
 
-Projectile::Projectile(float positionX, float positionY, float velocityXS, float velocityYS, float speed, float& time,
+
+Projectile::Projectile(float positionX, float positionY, float velocityXS, float velocityYS, float powerShot, float& time,
     std::vector<Particles>& particles,
 
     std::vector<std::vector<int>>& maps):
     positionX(positionX), positionY(positionY),
     velocityX(velocityXS), velocityY(velocityYS),
-    speed(speed), timeF(time),
+    pushGravity(powerShot), timeF(time),
         particlesF(particles),
         map(maps) 
 {
-    //std::cout << "Create projectile" << std::endl;
     texture.loadFromFile("projectile.png");
     std::cout << "projectile create" << '\n';
-    
+
+    float minPowerShot = 10.0f;
+    float maxPowerShot = 1000.0f;
+    float minGravity = 0.001f;
+    float maxGravity = 0.00001f;
+
+
+    std::cout << positionX << " " << positionY << " " << velocityX << " " << velocityY << " " << pushGravity << '\n';
+    gravity = minGravity + (maxGravity - minGravity) * ((pushGravity - minPowerShot) / (maxPowerShot - minPowerShot));
+    std::cout<<"projectile gravity" << std::to_string(gravity) << '\n';
 }
 
-bool Projectile::isActive() {
-    //таймер с какого момента снар€д становитс€ активен
-    return (1/*timeLeft > 00000*0.8*/);
-}
-void Projectile::applyVelocity() {
-    //if (!explosion) {
-    //    // ќбновл€ем вертикальную скорость с учетом гравитации
-    //    velocityY += gravity;
-    //}
+
+void Projectile::normalizeVector(float& x, float& y) {
+    float length = std::sqrt(x * x + y * y);
+    if (length != 0) {
+        x /= length;
+        y /= length;
+    }
 }
 
 void Projectile::update() {
-    //time = clock.getElapsedTime().asMicroseconds();
-    //clock.restart();
-    //time = time / 2000;
-    std::cout << timeF << '\n';
-    if (!explosion) {
-        // ќбновл€ем позицию снар€да на основе скорости
-        positionX += velocityX * speed / 1000*timeF/ 8;
-        positionY += velocityY * speed / 1000*timeF/ 8;
 
-        // ќбновл€ем вертикальную скорость с учетом гравитации
-        velocityY += gravity * timeF/8;
+    //std::cout << timeF << '\n';
+    if (!explosion) {
+        // Ќормализуем вектор скорости
+        normalizeVector(velocityX, velocityY);
+        positionX += velocityX * speed *timeF;
+        positionY += velocityY * speed *timeF;
+        velocityY += gravity * timeF;
+
+
         bool flag = rand() % (1 + 1);
         if (1) {
 
             particlesF.push_back(Particles(1, positionX, positionY, timeF, ""));
-
         }
         // ”станавливаем угол поворота спрайта
         rotation = std::atan2(velocityY, velocityX) * 180 / 3.14159265f;
@@ -130,5 +134,6 @@ Projectile::Projectile(const Projectile& other)
     particlesF(other.particlesF),
     timeLeft(other.timeLeft),
     timeF(other.timeF),
-    map(other.map)
+    map(other.map),
+    gravity(other.gravity)
 {}

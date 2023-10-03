@@ -7,7 +7,7 @@
 class Particles
 {
 private:
-
+    const float speed = 100;
     float& timeS;
     float timeLeft = 0;
 

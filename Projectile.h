@@ -8,7 +8,7 @@ private:
     bool explosion=0;
     float velocityX=0;
     float velocityY=0;
-    float speed=0;
+    float speed = 0.03;
     float radius=10;
     int size=3;
     float positionX = 0;
@@ -22,14 +22,16 @@ private:
     float timeLeft = 0;
     float& timeF;
     std::vector<std::vector<int>> map;
+    float pushGravity = 0;
+    float gravity = 0;
 public:
-    sf::Clock clock;
-    float time = 0;
+
+    
     Projectile(const Projectile& other);
     bool isActive();
-    Projectile(float positionX, float positionY, float velocityXS, float velocityYS, float speed, float& time,
-        std::vector<Particles>& particles,
-        std::vector<std::vector<int>>& maps);
+    Projectile(float positionX, float positionY, float velocityXS, float velocityYS, float powerShot, float& time,
+    std::vector<Particles>& particles,
+    std::vector<std::vector<int>>& maps);
     void applyVelocity();
     void update();
     bool isExplosion();
@@ -39,6 +41,8 @@ public:
     void explosions();
     void render(sf::RenderWindow& window);
     void outOfMap();
+
+    void normalizeVector(float& x, float& y);
     bool operator==(const Projectile& other) const {
         return this == &other;
     }

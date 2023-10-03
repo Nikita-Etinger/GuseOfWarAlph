@@ -31,11 +31,6 @@ private:
 
 	float powerShot = 0;
 	std::vector<sf::CircleShape> circles;
-	float projectileSpeed;
-	float velocityXPr;
-	float velocityYPr;
-	float positionX;
-	float positionY;
 	float directionShot;
 
 
@@ -62,6 +57,9 @@ private:
 	bool ScanPosition();
 	int coorectCollision = 0;//корректировка колизии персонажа 
 	int distanceFall = 0;
+
+	std::vector<sf::Vector2f> aimVector;
+	bool changePowerDirectionMove = 0;
 public:
 
 	bool scanContactProjectile(float radius, vt coordinatePr);
@@ -79,6 +77,6 @@ public:
 	bool getEndTurn();
 	void render(bool turn);
 	bool isLive();
-
+	
 };
 

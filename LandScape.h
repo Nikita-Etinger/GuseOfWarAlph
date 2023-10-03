@@ -18,7 +18,7 @@ public:
 private:
     sf::Text timeLeftText;
     sf::Font font;
-    int timeLeft = 10;
+    int timeLeft = 60;
     float timeSecond = 0;
     std::vector<Particles> particlesF;
     std::vector<Projectile> projectile;

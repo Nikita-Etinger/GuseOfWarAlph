@@ -116,6 +116,7 @@ void LandScape::update() {
                 if (players[i].getEndTurn()) {
                     players[i].resetStage();
                     indexPlayer++;
+                    timeLeft = 60;
                     if (!players[indexPlayer].isLive())indexPlayer++;
                     if (indexPlayer >= players.size() - 1) {
                         indexPlayer = 0;
@@ -220,7 +221,7 @@ void LandScape::handleEvents()
             {
                 std::lock_guard<std::mutex> lock(mutex);
                 if(projectile.empty())
-                projectileBufer.push_back(Projectile(mapX, mapY, 0.1f, -0.1f, 1000, time, particlesF,map));
+                projectileBufer.push_back(Projectile(mapX, mapY, 0.5f, -0.6f, 1000, time, particlesF,map));
             }
         }
     }
